@@ -1,0 +1,9 @@
+# A imagem dos adaptadores leva só src/; o example-seed tem a própria imagem, construída da pasta dele.
+.git
+**/node_modules
+**/.env
+**/.env.*
+test
+seeds
+carga
+example-seed

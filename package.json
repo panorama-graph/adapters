@@ -15,7 +15,7 @@
     "graph-deployments": "bun src/graph-deployments/cli.ts",
     "graph-receiver": "bun src/graph-receiver/cli.ts",
     "lint": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test ./test"
   },
   "devDependencies": {
     "@types/bun": "^1.1.8",
@@ -23,6 +23,6 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@panorama-graph/sdk": "workspace:*"
+    "@panorama-graph/sdk": "^0.1.0"
   }
 }

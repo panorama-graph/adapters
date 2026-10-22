@@ -13,7 +13,7 @@ bun run example-seed data/acme --dry-run --print  # e imprime os retratos em JSO
 GRAPH_API_URL=http://localhost:3200 bun run example-seed data/acme
 ```
 
-Pela imagem (o compose da raiz faz isto no perfil `exemplo`):
+Pela imagem (o compose da raiz deste repositório faz isto no perfil `exemplo`):
 
 ```sh
 docker build --network host -t example-seed .
@@ -102,7 +102,7 @@ As regras que todo adaptador segue, e que o exemplo mostra:
 5. Rode com `--dry-run` até não haver erro, envie, e envie de novo: a segunda carga só tem `unchanged`.
 6. Agende o envio (CronJob, pipeline agendado). Cada envio é o retrato completo do que a fonte tem naquele momento.
 
-O que o grafo aceita (tipos de nó e de relação, propriedades, valores fixos e livres, receitas de chave) está no [MODELO.md](../api/MODELO.md). O que não cabe no modelo é mudança versionada na API, e não neste adaptador.
+O que o grafo aceita (tipos de nó e de relação, propriedades, valores fixos e livres, receitas de chave) está no [MODELO.md](https://github.com/panorama-graph/panorama-graph/blob/main/api/MODELO.md). O que não cabe no modelo é mudança versionada na API, e não neste adaptador.
 
 ## Desenvolvimento
 
@@ -111,4 +111,4 @@ bun run lint   # tsc
 bun test       # tradução, conferência e os exports de data/acme
 ```
 
-O teste dos exports do ACME Bank também confere que os donos do catálogo e os componentes das rotas existem no resto da carga de exemplo (`../adapters`). Fora do monorepo, esse teste é pulado.
+O teste dos exports do ACME Bank também confere que os donos do catálogo e os componentes das rotas existem no resto da carga de exemplo (`../seeds/acme/` e `../test/fixtures/`). Numa cópia fora deste repositório, esse teste é pulado.

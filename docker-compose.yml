@@ -1,0 +1,79 @@
+# Adaptadores ao lado de uma instância do panorama-graph já no ar (o compose do repositório panorama-graph sobe o
+# Neo4j, a API e o console). Chamam a API em GRAPH_API_URL: por padrão, a porta 3200 do host.
+#   docker compose up -d --build                        o receptor dos builds (porta 3210, RECEIVER_PORT)
+#   docker compose --profile exemplo up -d --build      e carrega a organização de exemplo (ACME Bank)
+#   docker compose run --rm carga                       carrega os *.yaml de ./carga (a sua organização)
+name: panorama-graph-adapters
+
+x-api: &api
+  # host.docker.internal é o host também no Linux, pelo host-gateway.
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+services:
+  # O graph-receiver: recebe os artefatos de build que o plugin Gradle envia (`./gradlew architecturePublish`) e os
+  # publica na API. É o endereço que os pipelines usam (PANORAMA_GRAPH_URL).
+  receptor:
+    <<: *api
+    image: panorama-graph-adapters:local
+    build: .
+    command: ["graph-receiver", "--api", "${GRAPH_API_URL:-http://host.docker.internal:3200}"]
+    ports:
+      - "${RECEIVER_PORT:-3210}:3210"
+    restart: unless-stopped
+
+  # Carga de exemplo (organização fictícia ACME Bank), só com o perfil `exemplo`, em dois serviços que rodam uma vez e
+  # saem: este, com a carga à mão (catálogo e configuração, seeds/acme) e a arquitetura de build de dois serviços (os
+  # artefatos reais de test/fixtures), e o `exemplo-organizacao`. A ordem entre eles não importa. A data das
+  # afirmações é fixa: num grafo com retratos mais novos dos mesmos escopos, a API recusa a carga como mais antiga
+  # (`outdated`), e o exemplo não sobrescreve nada.
+  exemplo:
+    <<: *api
+    profiles: ["exemplo"]
+    image: panorama-graph-adapters:local
+    build: .
+    volumes:
+      - ./seeds/acme:/exemplo/carga:ro
+      - ./test/fixtures:/exemplo/builds:ro
+    environment:
+      GRAPH_API_URL: ${GRAPH_API_URL:-http://host.docker.internal:3200}
+      OBSERVED_AT: "2026-10-01T00:00:00Z"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        set -e
+        graph-seed /exemplo/carga --observed-at "$$OBSERVED_AT"
+        for build in /exemplo/builds/*/; do
+          graph-publish "$$build" --observed-at "$$OBSERVED_AT"
+        done
+    restart: "no"
+
+  # Times, pessoas e infraestrutura da organização de exemplo, pelo example-seed: o exemplo de adaptador próprio de
+  # uma organização, que traduz os exports dela (example-seed/data/acme) e publica pelo SDK.
+  exemplo-organizacao:
+    <<: *api
+    profiles: ["exemplo"]
+    image: example-seed:local
+    build: ./example-seed
+    volumes:
+      - ./example-seed/data/acme:/data:ro
+    environment:
+      GRAPH_API_URL: ${GRAPH_API_URL:-http://host.docker.internal:3200}
+    command: ["/data", "--observed-at", "2026-10-01T00:00:00Z"]
+    restart: "no"
+
+  # Carga à mão da sua organização: os *.yaml de ./carga, pelo graph-seed (ver os primeiros passos do panorama-graph).
+  #   docker compose run --rm carga --dry-run    monta os retratos e mostra o resumo, sem enviar
+  #   docker compose run --rm carga              envia
+  carga:
+    <<: *api
+    profiles: ["carga"]
+    image: panorama-graph-adapters:local
+    build: .
+    volumes:
+      - ./carga:/carga:ro
+    environment:
+      GRAPH_API_URL: ${GRAPH_API_URL:-http://host.docker.internal:3200}
+    entrypoint: ["graph-seed", "/carga"]
+    command: []
+    restart: "no"

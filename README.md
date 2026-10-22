@@ -1,6 +1,6 @@
 # adapters
 
-Adaptadores de carga do [panorama-graph-api](../api): leem uma fonte, traduzem o que ela afirma para o modelo do grafo e enviam retratos ao `POST /v1/ingest`.
+Adaptadores de carga do [panorama-graph](https://github.com/panorama-graph/panorama-graph): leem uma fonte, traduzem o que ela afirma para o modelo do grafo e enviam retratos ao `POST /v1/ingest`.
 
 - **`graph-publish`**: o pipeline de cada componente publica a arquitetura gerada no próprio build.
 - **`graph-receiver`**: o serviço que recebe esses mesmos artefatos pela rede (`POST /v1/builds`) e os publica com a tradução do `graph-publish`. É para onde o plugin Gradle envia (`./gradlew architecturePublish`): o pipeline não precisa de imagem do grafo.
@@ -45,7 +45,7 @@ A saída é `0` quando tudo foi publicado, ou quando a API já tinha um retrato 
 
 ### Receitas de chave
 
-As receitas são as do SDK do grafo (`@panorama-graph/sdk`, em [sdks/typescript](../sdks/typescript/README.md), usado aqui pelo workspace), reexportadas em [src/core/keys.ts](src/core/keys.ts): todo produtor precisa usar as mesmas para que fatos de fontes diferentes caiam no mesmo nó. O tipo do retrato, a versão do modelo e o cliente do REST também vêm do SDK.
+As receitas são as do SDK do grafo (`@panorama-graph/sdk`, em [sdks/typescript](https://github.com/panorama-graph/panorama-graph/tree/main/sdks/typescript), usado aqui pela versão publicada), reexportadas em [src/core/keys.ts](src/core/keys.ts): todo produtor precisa usar as mesmas para que fatos de fontes diferentes caiam no mesmo nó. O tipo do retrato, a versão do modelo e o cliente do REST também vêm do SDK.
 
 | Nó | Chave |
 |---|---|
@@ -82,7 +82,7 @@ As receitas são as do SDK do grafo (`@panorama-graph/sdk`, em [sdks/typescript]
 - **Pact:** o pact tem caminhos concretos (`/products/product-1`). Cada interação é casada com as operações dos clientes HTTP do mesmo build para o mesmo provedor e vira `CALLS` para a operação. Interação sem operação que case fica só no `CONSUMES`, com aviso. Pacts só de mensagens ficam para o AsyncAPI.
 - **Acesso a dados:** `OWNS_DATA` só quando a classe que mapeia o dataset é do próprio componente (`declaredIn: project`). Cada dataset acessado vira `READS` e/ou `WRITES` (`read-write` dá os dois), com a evidência do primeiro ponto de chamada. O que o build não resolveu (`unresolved`) não vira fato: sai como aviso.
 - **AsyncAPI:** na versão 3, `send` é publicar e `receive` é consumir. Na versão 2, `subscribe` é a aplicação publicando e `publish` é ela consumindo. Um canal com placeholder não resolvido (`${...}`) fica de fora, com aviso.
-- **Versões de APIs e tópicos:** duas versões que convivem são dois nós, cada um com `version` (`v1`, `v2`); sem versão, a chave é a de sempre ([Versões de APIs e tópicos](../api/MODELO.md#versões-de-apis-e-tópicos)). A versão declarada vence a da convenção: `x-panorama-graph-version` no OpenAPI (na operação, no path item ou em `info`) e no canal do AsyncAPI, e `version` na operação dos clientes HTTP; é por ela que entra o que a convenção não lê (cabeçalho, media type, tipo da mensagem). Sem declaração, valem as convenções do SDK. **No código**, o primeiro segmento `/v<N>` do caminho: uma API por versão, com os próprios endpoints, no provedor e nos clientes. **No tópico**, o sufixo `-v<N>` ou `.v<N>` do nome. **Na infraestrutura**, o sufixo `-v<N>` no nome do serviço exposto: o cliente que chama `product-api-v2` (`version` do cliente, a do `group` sem `service`, ou a do nome do provedor no pact) consome `api:product-api/v2/http`, mas chama os endpoints do código, sem a versão do host (`endpoint:product-api/GET /products`). O provedor não sabe dessa versão (o nome de serviço do código é sem ela): quem liga a versão exposta ao componente é o `graph-deployments`. No pact, a interação só casa com a operação conhecida da mesma versão do código.
+- **Versões de APIs e tópicos:** duas versões que convivem são dois nós, cada um com `version` (`v1`, `v2`); sem versão, a chave é a de sempre ([Versões de APIs e tópicos](https://github.com/panorama-graph/panorama-graph/blob/main/api/MODELO.md#versões-de-apis-e-tópicos)). A versão declarada vence a da convenção: `x-panorama-graph-version` no OpenAPI (na operação, no path item ou em `info`) e no canal do AsyncAPI, e `version` na operação dos clientes HTTP; é por ela que entra o que a convenção não lê (cabeçalho, media type, tipo da mensagem). Sem declaração, valem as convenções do SDK. **No código**, o primeiro segmento `/v<N>` do caminho: uma API por versão, com os próprios endpoints, no provedor e nos clientes. **No tópico**, o sufixo `-v<N>` ou `.v<N>` do nome. **Na infraestrutura**, o sufixo `-v<N>` no nome do serviço exposto: o cliente que chama `product-api-v2` (`version` do cliente, a do `group` sem `service`, ou a do nome do provedor no pact) consome `api:product-api/v2/http`, mas chama os endpoints do código, sem a versão do host (`endpoint:product-api/GET /products`). O provedor não sabe dessa versão (o nome de serviço do código é sem ela): quem liga a versão exposta ao componente é o `graph-deployments`. No pact, a interação só casa com a operação conhecida da mesma versão do código.
 
 ### Formatos do produto
 
@@ -157,7 +157,7 @@ O nome com que os clientes conhecem o serviço, que nomeia a API e os endpoints 
 
 ## Gerar os artefatos
 
-Qualquer build que produza esses arquivos serve. Para projetos Gradle, o produto tem o plugin [panorama-graph](../gradle-plugin/README.md) (`./gradlew architectureArtifacts`), que gera cada artefato só quando o projeto tem de onde tirá-lo. Na organização de exemplo (ACME Bank), a biblioteca interna aplica esse plugin, e o template de pipeline guarda `build/architecture/` como artefato do job `tests`.
+Qualquer build que produza esses arquivos serve. Para projetos Gradle, o produto tem o plugin [panorama-graph](https://github.com/panorama-graph/gradle-plugin#readme) (`./gradlew architectureArtifacts`), que gera cada artefato só quando o projeto tem de onde tirá-lo. Na organização de exemplo (ACME Bank), a biblioteca interna aplica esse plugin, e o template de pipeline guarda `build/architecture/` como artefato do job `tests`.
 
 ### No pipeline
 
@@ -173,10 +173,10 @@ publish_architecture:
     - ./gradlew architecturePublish -PpanoramaGraph.url="$PANORAMA_GRAPH_URL"   # em MR: -PpanoramaGraph.dryRun
 ```
 
-**Pelo `graph-publish`**, numa imagem no pipeline. A imagem do `Dockerfile` traz os CLIs (`graph-publish`, `graph-deployments`, `graph-seed` e `graph-receiver`) compilados em binários, sobre uma base com shell, `tar` e `kubectl`. O build instala o SDK do registry npm configurado em `.npmrc` (o escopo `@panorama-graph`); com o registry em `localhost`, o build usa a rede do host:
+**Pelo `graph-publish`**, numa imagem no pipeline. A imagem do `Dockerfile` traz os CLIs (`graph-publish`, `graph-deployments`, `graph-seed` e `graph-receiver`) compilados em binários, sobre uma base com shell, `tar` e `kubectl`. O build instala o SDK do registry npm (o escopo `@panorama-graph`), na versão do `bun.lock`; com um registry em `localhost`, configurado num `.npmrc`, o build usa a rede do host:
 
 ```bash
-docker build --network host -t panorama-graph-publish:0.1.0 .   # nesta pasta (adapters/)
+docker build --network host -t panorama-graph-publish:0.1.0 .   # na raiz deste repositório
 ```
 
 O job roda depois do build, com o diretório de artefatos do build. A identidade sai das variáveis do CI, e o repositório não precisa ser clonado de novo:
@@ -218,7 +218,7 @@ GRAPH_API_URL=http://localhost:3200 bun run graph-receiver          # porta 3210
 docker run -p 3210:3210 panorama-graph-publish:0.1.0 graph-receiver --api http://api:3200
 ```
 
-O receptor dos pacotes de build: recebe os artefatos de `build/architecture` num `POST /v1/builds`, monta os retratos com a tradução do `graph-publish` e os grava no `POST /v1/ingest`. A API continua só guardando e servindo fatos; o receptor é um adaptador como os outros, que sobe com a instância. O corpo (formato `panorama-graph-build/1`, em [schemas/build.schema.json](schemas/build.schema.json)) leva cada arquivo JSON pelo caminho relativo:
+O receptor dos pacotes de build: recebe os artefatos de `build/architecture` num `POST /v1/builds`, monta os retratos com a tradução do `graph-publish` e os grava no `POST /v1/ingest`. A API continua só guardando e servindo fatos; o receptor é um adaptador como os outros, que sobe ao lado da instância (serviço `receptor` do [docker-compose.yml](docker-compose.yml)). O corpo (formato `panorama-graph-build/1`, em [schemas/build.schema.json](schemas/build.schema.json)) leva cada arquivo JSON pelo caminho relativo:
 
 ```json
 {
@@ -232,7 +232,7 @@ O receptor dos pacotes de build: recebe os artefatos de `build/architecture` num
 - **Identidade só do pacote.** O componente, o host e o commit vêm do `manifest.json` (que o build gera com as variáveis do CI ou o git), com `options` por cima. As variáveis de ambiente do receptor nunca entram.
 - **`dryRun`** monta e confere os retratos sem gravar: no MR, o pipeline valida o pacote no mesmo receptor.
 - **Respostas:** `200` com o resultado de cada retrato (`ok`, `outdated` ou, no `dryRun`, `planned`); `400` (`invalid_build`) para pacote sem `manifest.json`, com caminho inválido ou com um formato que ele não lê; `422` (`snapshot_rejected`) quando a API recusa um retrato, com os erros de validação; `502` (`graph_unavailable`) quando a API não responde. Os erros seguem o formato do produto, `{ error, code, status, details }`. Com `Accept: text/plain`, a resposta é o resumo do `graph-publish`, que o plugin mostra no build.
-- **Sem autenticação**, como a API (ver as perguntas em aberto do [ROADMAP](../ROADMAP.md#perguntas-em-aberto)). Tamanho máximo de um pacote: 32 MB (`--max-body-mb`).
+- **Sem autenticação**, como a API (ver as perguntas em aberto do [ROADMAP](https://github.com/panorama-graph/panorama-graph/blob/main/ROADMAP.md#perguntas-em-aberto)). Tamanho máximo de um pacote: 32 MB (`--max-body-mb`).
 
 Sem o plugin, o mesmo pacote sai do diretório com `jq` (`"dryRun": true` para só conferir):
 
@@ -274,7 +274,7 @@ bun run graph-seed seeds/acme --dry-run          # monta os retratos e mostra o 
 GRAPH_API_URL=http://localhost:3200 bun run graph-seed seeds/acme
 ```
 
-Para uma primeira carga, veja o exemplo neutro dos [primeiros passos](../PRIMEIROS-PASSOS.md#primeira-carga-à-mão); o que cada tipo aceita está no [MODELO.md](../api/MODELO.md).
+Para uma primeira carga, veja o exemplo neutro dos [primeiros passos](https://github.com/panorama-graph/panorama-graph/blob/main/PRIMEIROS-PASSOS.md#primeira-carga-à-mão); o que cada tipo aceita está no [MODELO.md](https://github.com/panorama-graph/panorama-graph/blob/main/api/MODELO.md).
 
 Lê os arquivos `*.yaml` de um diretório, em ordem alfabética, e envia cada item da lista `snapshots` como um retrato. As opções e os códigos de saída são os do `graph-publish`. O `observedAt` é o momento da carga (`--observed-at` muda).
 
@@ -300,7 +300,7 @@ snapshots:
 
 No ACME Bank, o que ainda não tem adaptador é carregado à mão, com as fontes e as evidências que os adaptadores de leitura central vão ter. Quem consulta o grafo vê fatos `observed` dessas fontes, como no sistema final.
 
-A organização (níveis, grupos e pessoas, fonte `directory`) e a infraestrutura dos ambientes (`k8s-infra` e `k8s-routes`) não estão aqui: vêm dos exports do ACME Bank pelo [example-seed](../example-seed/README.md), o exemplo de adaptador próprio de uma organização. A arquitetura de build dos dois serviços de exemplo vem dos artefatos de `test/fixtures/`, pelo `graph-publish`.
+A organização (níveis, grupos e pessoas, fonte `directory`) e a infraestrutura dos ambientes (`k8s-infra` e `k8s-routes`) não estão aqui: vêm dos exports do ACME Bank pelo [example-seed](example-seed/README.md), o exemplo de adaptador próprio de uma organização. A arquitetura de build dos dois serviços de exemplo vem dos artefatos de `test/fixtures/`, pelo `graph-publish`.
 
 | Arquivo | Fonte (`source`) e escopo | Fatos |
 |---|---|---|
@@ -309,13 +309,18 @@ A organização (níveis, grupos e pessoas, fonte `directory`) e a infraestrutur
 
 O `dev` transcreve o `deploy/values-dev.yaml` de cada serviço; `stage` e `prd` espelham o `dev`. Toda a organização é fictícia.
 
-**Exemplo da instância:** o compose da raiz carrega esta pasta, os artefatos de `test/fixtures/` e os exports do `example-seed` (perfil `exemplo`, ver os [primeiros passos](../PRIMEIROS-PASSOS.md)), com uma data fixa nas afirmações, para não sobrescrever retratos mais novos.
+**Exemplo da instância:** o [docker-compose.yml](docker-compose.yml) deste repositório carrega esta pasta, os artefatos de `test/fixtures/` e os exports do `example-seed` numa instância já no ar (perfil `exemplo`, ver os [primeiros passos](https://github.com/panorama-graph/panorama-graph/blob/main/PRIMEIROS-PASSOS.md)), com uma data fixa nas afirmações, para não sobrescrever retratos mais novos.
 
 **Saída da carga à mão:** quando um adaptador real cobrir um assunto, o retrato correspondente sai do arquivo com a lista vazia e é reenviado, e os fatos manuais viram `stale`.
 
 ## Desenvolvimento
 
 ```bash
+bun install
 bun run lint   # tsc
-bun test       # tradutores sobre artefatos reais em test/fixtures/
+bun run test   # tradutores sobre artefatos reais em test/fixtures/
 ```
+
+O `example-seed` é um projeto à parte, com o próprio `package.json` e `bun.lock`: os mesmos comandos, na pasta dele.
+
+Ao lado de uma instância no ar (`GRAPH_API_URL`, por padrão a porta 3200 do host), o [docker-compose.yml](docker-compose.yml) sobe o receptor (`docker compose up -d --build`), a carga de exemplo (`--profile exemplo`) e a carga à mão de `./carga` (`docker compose run --rm carga`).

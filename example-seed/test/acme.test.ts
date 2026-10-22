@@ -39,10 +39,10 @@ describe("exports da organização de exemplo (data/acme)", () => {
     expect(teams).toEqual(["level:time"]);
   });
 
-  // O resto da carga de exemplo está no projeto ao lado: o YAML do graph-seed (catálogo, configuração e build) e os
-  // artefatos de build que o graph-publish envia. Numa cópia deste projeto fora do monorepo, eles não existem, e a
-  // conferência não se aplica.
-  const adapters = join(import.meta.dir, "..", "..", "adapters");
+  // O resto da carga de exemplo está nos adaptadores, na raiz do repositório: o YAML do graph-seed (catálogo,
+  // configuração e build) e os artefatos de build que o graph-publish envia. Numa cópia deste projeto fora do
+  // repositório, eles não existem, e a conferência não se aplica.
+  const adapters = join(import.meta.dir, "..", "..");
   const seeds = join(adapters, "seeds", "acme");
   const builds = join(adapters, "test", "fixtures");
   test.skipIf(!existsSync(seeds))("todo dono do catálogo e todo componente roteado existem nas outras cargas", () => {
