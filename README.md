@@ -1,4 +1,4 @@
-# adapters
+# panorama-graph-adapters
 
 Adaptadores de carga do [panorama-graph](https://github.com/panorama-graph/panorama-graph): leem uma fonte, traduzem o que ela afirma para o modelo do grafo e enviam retratos ao `POST /v1/ingest`.
 
@@ -157,7 +157,7 @@ O nome com que os clientes conhecem o serviço, que nomeia a API e os endpoints 
 
 ## Gerar os artefatos
 
-Qualquer build que produza esses arquivos serve. Para projetos Gradle, o produto tem o plugin [panorama-graph](https://github.com/panorama-graph/gradle-plugin#readme) (`./gradlew architectureArtifacts`), que gera cada artefato só quando o projeto tem de onde tirá-lo. Na organização de exemplo (ACME Bank), a biblioteca interna aplica esse plugin, e o template de pipeline guarda `build/architecture/` como artefato do job `tests`.
+Qualquer build que produza esses arquivos serve. Para projetos Gradle, o produto tem o plugin [panorama-graph](https://github.com/panorama-graph/panorama-graph-gradle-plugin#readme) (`./gradlew architectureArtifacts`), que gera cada artefato só quando o projeto tem de onde tirá-lo. Na organização de exemplo (ACME Bank), a biblioteca interna aplica esse plugin, e o template de pipeline guarda `build/architecture/` como artefato do job `tests`.
 
 ### No pipeline
 
