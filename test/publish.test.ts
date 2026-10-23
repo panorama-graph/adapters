@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Snapshot } from "../src/core/snapshot";
@@ -13,7 +13,7 @@ import { bringers, dependencyTree, type CycloneDx } from "../src/graph-publish/a
 import { planPublish } from "../src/graph-publish/publish";
 
 /** Artefatos reais de build/architecture, gerados pelo plugin Gradle nos dois serviços de exemplo do ACME Bank. */
-const fixture = (name: string) => join(import.meta.dir, "fixtures", name);
+const fixture = (name: string) => join(import.meta.dirname, "fixtures", name);
 const AT = "2026-09-29T12:00:00.000Z";
 
 const PCA = "component:acme/credito/product-catalog-api";
@@ -187,8 +187,8 @@ describe("graph-publish sobre a loan-simulation-api", () => {
       clients: [{ group: "pricing", type: "com.example.PricingClient", operations: [{ method: "GET", path: "/rates", function: "rates" }] }],
     };
     const snap = mapHttpClients(createContext(plan.identity), doc).build(AT);
-    expect(rel(snap, "CONSUMES")[0].evidence).toEndWith("http-clients.json#/clients/0");
-    expect(rel(snap, "CALLS")[0].evidence).toEndWith("http-clients.json#/clients/0/operations/0");
+    expect(rel(snap, "CONSUMES")[0].evidence).toMatch(/http-clients\.json#\/clients\/0$/);
+    expect(rel(snap, "CALLS")[0].evidence).toMatch(/http-clients\.json#\/clients\/0\/operations\/0$/);
   });
 
   test("cliente de API versionada no host: a API daquela versão do serviço", () => {

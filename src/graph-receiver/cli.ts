@@ -1,4 +1,6 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import type { AddressInfo } from "node:net";
 import { parseArgs } from "node:util";
 import { PanoramaGraphClient } from "@panorama-graph/sdk";
 import { createReceiver } from "./receiver";
@@ -38,12 +40,60 @@ const handler = createReceiver({
   client: new PanoramaGraphClient({ baseUrl: api }),
   log: (line) => console.log(`${new Date().toISOString()} ${line}`),
 });
-const server = Bun.serve({ port, maxRequestBodySize: maxBodyMb * 1024 * 1024, fetch: handler });
-console.log(`graph-receiver em http://localhost:${server.port}, publicando em ${api}`);
+const maxBody = maxBodyMb * 1024 * 1024;
+
+/** Lê o pedido do Node como `Request`, ou null se o corpo passar de `maxBody`. */
+async function toRequest(req: IncomingMessage): Promise<Request | null> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of req as AsyncIterable<Buffer>) {
+    size += chunk.length;
+    if (size > maxBody) return null;
+    chunks.push(chunk);
+  }
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(req.headers)) {
+    for (const v of Array.isArray(value) ? value : value === undefined ? [] : [value]) headers.append(name, v);
+  }
+  const hasBody = req.method !== "GET" && req.method !== "HEAD";
+  return new Request(`http://${req.headers.host ?? "localhost"}${req.url ?? "/"}`, {
+    method: req.method,
+    headers,
+    body: hasBody ? Buffer.concat(chunks) : undefined,
+  });
+}
+
+async function serve(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  if (Number(req.headers["content-length"] ?? 0) > maxBody) {
+    res.writeHead(413, { connection: "close" }).end();
+    req.destroy();
+    return;
+  }
+  const request = await toRequest(req);
+  if (!request) {
+    res.writeHead(413, { connection: "close" }).end();
+    req.destroy();
+    return;
+  }
+  const response = await handler(request);
+  res.writeHead(response.status, Object.fromEntries(response.headers));
+  res.end(Buffer.from(await response.arrayBuffer()));
+}
+
+const server = createServer((req, res) => {
+  serve(req, res).catch((err) => {
+    console.error(err);
+    if (!res.headersSent) res.writeHead(500);
+    res.end();
+  });
+});
+server.listen(port, () => {
+  console.log(`graph-receiver em http://localhost:${(server.address() as AddressInfo).port}, publicando em ${api}`);
+});
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
-    server.stop();
+    server.close();
     process.exit(0);
   });
 }

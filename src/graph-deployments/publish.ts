@@ -1,7 +1,9 @@
+import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { type PanoramaGraphClient, PanoramaGraphError } from "@panorama-graph/sdk";
+import semver from "semver";
 import { ingest } from "../core/api";
 import { componentKey } from "../core/keys";
 import { PRODUCER } from "../core/producer";
@@ -50,7 +52,7 @@ export async function frozenRevisions(client: PanoramaGraphClient): Promise<Map<
 export function staleReason(producers: Producer[]): string | null {
   for (const p of producers) {
     if (!p) return "montado antes de os adaptadores informarem a versão";
-    if (p.name === PRODUCER.name && Bun.semver.order(p.version, PRODUCER.version) < 0) return `montado pela versão ${p.version}`;
+    if (p.name === PRODUCER.name && semver.lt(p.version, PRODUCER.version)) return `montado pela versão ${p.version}`;
   }
   return null;
 }
@@ -65,10 +67,10 @@ async function openBundle(url: string, fetchFn: typeof fetch): Promise<{ dir: st
   const file = join(dir, "bundle.tar.gz");
   writeFileSync(file, Buffer.from(await res.arrayBuffer()));
   const out = join(dir, "architecture");
-  const tar = Bun.spawnSync(["sh", "-c", `mkdir -p "${out}" && tar -xzf "${file}" -C "${out}"`], { stderr: "pipe" });
-  if (tar.exitCode !== 0) {
+  const tar = spawnSync("sh", ["-c", `mkdir -p "${out}" && tar -xzf "${file}" -C "${out}"`], { encoding: "utf8" });
+  if (tar.status !== 0) {
     cleanup();
-    return `pacote ilegível: ${tar.stderr.toString().trim()}`;
+    return `pacote ilegível: ${(tar.stderr || tar.error?.message || "").trim()}`;
   }
   return { dir: out, cleanup };
 }

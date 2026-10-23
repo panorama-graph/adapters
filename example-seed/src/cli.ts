@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { parseArgs } from "node:util";
 import { PanoramaGraphClient, PanoramaGraphError } from "@panorama-graph/sdk";
 import { plan } from "./plan";

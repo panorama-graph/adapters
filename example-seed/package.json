@@ -3,19 +3,28 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=22.18"
+  },
   "bin": {
-    "example-seed": "src/cli.ts"
+    "example-seed": "dist/example-seed.js"
   },
   "scripts": {
-    "example-seed": "bun src/cli.ts",
+    "example-seed": "tsx src/cli.ts",
+    "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --outfile=dist/example-seed.js --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\"",
     "lint": "tsc --noEmit",
-    "test": "bun test"
+    "test": "vitest run"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.8",
-    "typescript": "^5.5.4"
+    "@types/node": "^22.20.5",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.15",
+    "typescript": "^5.5.4",
+    "vitest": "^5.0.5"
   },
   "dependencies": {
-    "@panorama-graph/sdk": "0.1.0"
+    "@panorama-graph/sdk": "0.1.0",
+    "yaml": "^2.9.1"
   }
 }

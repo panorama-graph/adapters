@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { endpointKey, groupKey, libraryKey, matchesTemplate, nodeTypeFromKey, normalizePath, parsePurl, personKey, resourceKey } from "../src/core/keys";
 import { parseRepositoryUrl } from "../src/graph-publish/identity";
 

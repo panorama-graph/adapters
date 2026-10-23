@@ -1,11 +1,12 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import YAML from "yaml";
 import { plan } from "../src/plan";
 
 /** Os exports da organização de exemplo (ACME Bank), que a carga de exemplo do compose envia. */
 describe("exports da organização de exemplo (data/acme)", () => {
-  const { snapshots, errors } = plan(join(import.meta.dir, "..", "data", "acme"), "2026-10-01T00:00:00Z");
+  const { snapshots, errors } = plan(join(import.meta.dirname, "..", "data", "acme"), "2026-10-01T00:00:00Z");
   const org = snapshots.find((s) => s.source === "directory")!;
 
   test("traduzem sem erros, e cada ambiente tem os seus retratos", () => {
@@ -42,13 +43,13 @@ describe("exports da organização de exemplo (data/acme)", () => {
   // O resto da carga de exemplo está nos adaptadores, na raiz do repositório: o YAML do graph-seed (catálogo,
   // configuração e build) e os artefatos de build que o graph-publish envia. Numa cópia deste projeto fora do
   // repositório, eles não existem, e a conferência não se aplica.
-  const adapters = join(import.meta.dir, "..", "..");
+  const adapters = join(import.meta.dirname, "..", "..");
   const seeds = join(adapters, "seeds", "acme");
   const builds = join(adapters, "test", "fixtures");
   test.skipIf(!existsSync(seeds))("todo dono do catálogo e todo componente roteado existem nas outras cargas", () => {
     const groups = new Set(org.nodes!.map((n) => n.key));
     const yaml = readdirSync(seeds).flatMap(
-      (f) => ((Bun.YAML.parse(readFileSync(join(seeds, f), "utf8")) as { snapshots?: any[] })?.snapshots ?? []) as any[],
+      (f) => ((YAML.parse(readFileSync(join(seeds, f), "utf8")) as { snapshots?: any[] })?.snapshots ?? []) as any[],
     );
     const catalog = yaml.find((s) => s.source === "service-catalog");
     const owners: string[] = catalog.relations.filter((r: any) => r.type === "OWNED_BY").map((r: any) => r.to);

@@ -3,26 +3,37 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=22.18"
+  },
   "bin": {
-    "graph-publish": "src/graph-publish/cli.ts",
-    "graph-seed": "src/graph-seed/cli.ts",
-    "graph-deployments": "src/graph-deployments/cli.ts",
-    "graph-receiver": "src/graph-receiver/cli.ts"
+    "graph-publish": "dist/graph-publish.js",
+    "graph-seed": "dist/graph-seed.js",
+    "graph-deployments": "dist/graph-deployments.js",
+    "graph-receiver": "dist/graph-receiver.js"
   },
   "scripts": {
-    "graph-publish": "bun src/graph-publish/cli.ts",
-    "graph-seed": "bun src/graph-seed/cli.ts",
-    "graph-deployments": "bun src/graph-deployments/cli.ts",
-    "graph-receiver": "bun src/graph-receiver/cli.ts",
+    "graph-publish": "tsx src/graph-publish/cli.ts",
+    "graph-seed": "tsx src/graph-seed/cli.ts",
+    "graph-deployments": "tsx src/graph-deployments/cli.ts",
+    "graph-receiver": "tsx src/graph-receiver/cli.ts",
+    "build": "esbuild graph-publish=src/graph-publish/cli.ts graph-seed=src/graph-seed/cli.ts graph-deployments=src/graph-deployments/cli.ts graph-receiver=src/graph-receiver/cli.ts --bundle --platform=node --format=esm --outdir=dist --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\"",
     "lint": "tsc --noEmit",
-    "test": "bun test ./test"
+    "test": "vitest run"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.8",
+    "@types/node": "^22.20.5",
+    "@types/semver": "^7.8.0",
     "ajv": "^8.20.0",
-    "typescript": "^5.5.4"
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.15",
+    "typescript": "^5.5.4",
+    "vitest": "^5.0.5"
   },
   "dependencies": {
-    "@panorama-graph/sdk": "^0.1.0"
+    "@panorama-graph/sdk": "^0.1.0",
+    "semver": "^7.8.5",
+    "yaml": "^2.9.1"
   }
 }

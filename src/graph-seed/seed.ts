@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import YAML from "yaml";
 import { NODE_TYPES, RELATION_TYPES } from "@panorama-graph/sdk";
 import { nodeTypeFromKey } from "../core/keys";
 import { type Props, type Snapshot, SnapshotBuilder } from "../core/snapshot";
@@ -32,7 +33,7 @@ export function planSeed(dir: string, observedAt: string): SeedPlan {
   const plan: SeedPlan = { snapshots: [], warnings: [], errors: [] };
   const files = readdirSync(dir).filter((f) => f.endsWith(".yaml") || f.endsWith(".yml")).sort();
   for (const file of files) {
-    const doc = Bun.YAML.parse(readFileSync(join(dir, file), "utf8")) as { snapshots?: SeedSnapshot[] } | null;
+    const doc = YAML.parse(readFileSync(join(dir, file), "utf8")) as { snapshots?: SeedSnapshot[] } | null;
     const list = doc?.snapshots ?? [];
     if (list.length === 0) plan.warnings.push(`${file}: nenhum retrato em "snapshots"`);
     list.forEach((s, i) => {

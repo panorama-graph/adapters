@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import Ajv2020 from "ajv/dist/2020";
@@ -7,7 +7,7 @@ import type { Snapshot } from "../src/core/snapshot";
 import { planPublish } from "../src/graph-publish/publish";
 import { BUILD_FORMAT, createReceiver, type BuildResponse } from "../src/graph-receiver/receiver";
 
-const fixture = (name: string) => join(import.meta.dir, "fixtures", name);
+const fixture = (name: string) => join(import.meta.dirname, "fixtures", name);
 const AT = "2026-10-19T12:00:00.000Z";
 
 /** O que o plugin Gradle envia: cada arquivo JSON de build/architecture pelo caminho relativo. */
@@ -134,7 +134,7 @@ describe("graph-receiver", () => {
   });
 
   test("o esquema do pacote aceita o que o receptor lê", () => {
-    const schema = JSON.parse(readFileSync(join(import.meta.dir, "..", "schemas", "build.schema.json"), "utf8"));
+    const schema = JSON.parse(readFileSync(join(import.meta.dirname, "..", "schemas", "build.schema.json"), "utf8"));
     const validate = new Ajv2020({ allErrors: true, validateFormats: false }).compile(schema);
     expect(schema.properties.format.const).toBe(BUILD_FORMAT);
     expect(validate({ format: BUILD_FORMAT, files: filesOf(fixture("loan-simulation-api")), options: { version: "1.0.0" } })).toBe(true);

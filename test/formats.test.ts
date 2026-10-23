@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -7,8 +7,8 @@ import { NODE_TYPES } from "@panorama-graph/sdk";
 import { FORMATS } from "../src/graph-publish/formats";
 import { planPublish } from "../src/graph-publish/publish";
 
-const root = join(import.meta.dir, "..");
-const fixture = (name: string) => join(import.meta.dir, "fixtures", name);
+const root = join(import.meta.dirname, "..");
+const fixture = (name: string) => join(import.meta.dirname, "fixtures", name);
 const schemaFile = { manifest: "manifest", application: "application", httpClients: "http-clients", dataAccess: "data-access" } as const;
 const readJson = (path: string) => JSON.parse(readFileSync(path, "utf8"));
 

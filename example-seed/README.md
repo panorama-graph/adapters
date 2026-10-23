@@ -7,10 +7,10 @@ Depende só do SDK publicado (`@panorama-graph/sdk`): copie a pasta para o seu r
 ## Rodar
 
 ```sh
-bun install
-bun run example-seed data/acme --dry-run          # traduz, confere contra o modelo e mostra o resumo
-bun run example-seed data/acme --dry-run --print  # e imprime os retratos em JSON
-GRAPH_API_URL=http://localhost:3200 bun run example-seed data/acme
+pnpm install
+pnpm run example-seed data/acme --dry-run          # traduz, confere contra o modelo e mostra o resumo
+pnpm run example-seed data/acme --dry-run --print  # e imprime os retratos em JSON
+GRAPH_API_URL=http://localhost:3200 pnpm run example-seed data/acme
 ```
 
 Pela imagem (o compose da raiz deste repositório faz isto no perfil `exemplo`):
@@ -107,8 +107,8 @@ O que o grafo aceita (tipos de nó e de relação, propriedades, valores fixos e
 ## Desenvolvimento
 
 ```sh
-bun run lint   # tsc
-bun test       # tradução, conferência e os exports de data/acme
+pnpm run lint   # tsc
+pnpm test       # tradução, conferência e os exports de data/acme
 ```
 
 O teste dos exports do ACME Bank também confere que os donos do catálogo e os componentes das rotas existem no resto da carga de exemplo (`../seeds/acme/` e `../test/fixtures/`). Numa cópia fora deste repositório, esse teste é pulado.

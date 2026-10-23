@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { PanoramaGraphClient, PanoramaGraphError } from "@panorama-graph/sdk";
 import { ingest } from "../src/core/api";
 import type { Snapshot } from "../src/core/snapshot";

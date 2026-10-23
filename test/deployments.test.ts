@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
+import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -96,8 +97,8 @@ describe("implantações lidas do cluster", () => {
 function bundleOf(fixture: string): Uint8Array {
   const dir = mkdtempSync(join(tmpdir(), "bundle-"));
   const file = join(dir, "architecture.tar.gz");
-  const tar = Bun.spawnSync(["tar", "-czf", file, "-C", join(import.meta.dir, "fixtures", fixture), "."]);
-  if (tar.exitCode !== 0) throw new Error(tar.stderr.toString());
+  const tar = spawnSync("tar", ["-czf", file, "-C", join(import.meta.dirname, "fixtures", fixture), "."], { encoding: "utf8" });
+  if (tar.status !== 0) throw new Error(tar.stderr);
   return readFileSync(file);
 }
 

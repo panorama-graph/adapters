@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: true
+
+# O SDK é do próprio produto: a versão nova entra sem esperar a idade mínima de publicação do pnpm.
+minimumReleaseAgeExclude:
+  - '@panorama-graph/*'

@@ -1,4 +1,5 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
+import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { PanoramaGraphClient } from "@panorama-graph/sdk";
@@ -33,9 +34,9 @@ marca o namespace como ambiente) e ${LABELS.environmentKind} (development, test,
 Saída 0: publicado. 1: erro de uso ou de leitura. 2: a API recusou um retrato.`;
 
 function kubectl<T>(args: string[]): T {
-  const res = Bun.spawnSync(["kubectl", ...args, "-o", "json"], { stderr: "pipe" });
-  if (res.exitCode !== 0) throw new Error(`kubectl ${args.join(" ")}: ${res.stderr.toString().trim()}`);
-  return JSON.parse(res.stdout.toString()) as T;
+  const res = spawnSync("kubectl", [...args, "-o", "json"], { encoding: "utf8", maxBuffer: 256 * 1024 * 1024 });
+  if (res.status !== 0) throw new Error(`kubectl ${args.join(" ")}: ${(res.stderr || res.error?.message || "").trim()}`);
+  return JSON.parse(res.stdout) as T;
 }
 
 const readJson = <T>(path: string): T => JSON.parse(readFileSync(path, "utf8")) as T;

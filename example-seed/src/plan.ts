@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import YAML from "yaml";
 import type { Snapshot } from "@panorama-graph/sdk";
 import { checkSnapshot } from "./check";
 import { type DirectoryExport, directorySnapshot } from "./directory";
@@ -17,7 +18,7 @@ export function plan(dir: string, observedAt: string): { snapshots: Snapshot[]; 
   }
   const infra = join(dir, "infra.yaml");
   if (existsSync(infra)) {
-    const res = infraSnapshots(Bun.YAML.parse(readFileSync(infra, "utf8")) as InfraInventory, observedAt);
+    const res = infraSnapshots(YAML.parse(readFileSync(infra, "utf8")) as InfraInventory, observedAt);
     snapshots.push(...res.snapshots);
     errors.push(...res.errors.map((e) => `infra.yaml: ${e}`));
   }

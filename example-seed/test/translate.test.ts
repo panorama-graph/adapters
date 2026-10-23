@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { checkSnapshot } from "../src/check";
 import { directorySnapshot, type DirectoryExport } from "../src/directory";
 import { infraSnapshots, type InfraInventory } from "../src/infra";

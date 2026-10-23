@@ -10,10 +10,10 @@ Adaptadores de carga do [panorama-graph](https://github.com/panorama-graph/panor
 ## graph-publish
 
 ```bash
-bun install
-bun run graph-publish build/architecture --dry-run          # monta os retratos e mostra o resumo
-bun run graph-publish build/architecture --dry-run --print  # e imprime os retratos em JSON
-GRAPH_API_URL=http://localhost:3200 bun run graph-publish build/architecture
+pnpm install
+pnpm run graph-publish build/architecture --dry-run          # monta os retratos e mostra o resumo
+pnpm run graph-publish build/architecture --dry-run --print  # e imprime os retratos em JSON
+GRAPH_API_URL=http://localhost:3200 pnpm run graph-publish build/architecture
 ```
 
 Lê um diretório de artefatos do build e envia **um retrato por artefato**. O escopo de cada retrato é o componente, `{ component: <caminho do repositório> }`. Quando um artefato falta, a fonte dele não é enviada, e a API mantém o último retrato que recebeu. Quando o artefato existe mas vem vazio (por exemplo, nenhum cliente HTTP), sai um retrato vazio, e o que aquela fonte afirmava antes vira `stale`.
@@ -173,7 +173,7 @@ publish_architecture:
     - ./gradlew architecturePublish -PpanoramaGraph.url="$PANORAMA_GRAPH_URL"   # em MR: -PpanoramaGraph.dryRun
 ```
 
-**Pelo `graph-publish`**, numa imagem no pipeline. A imagem do `Dockerfile` traz os CLIs (`graph-publish`, `graph-deployments`, `graph-seed` e `graph-receiver`) compilados em binários, sobre uma base com shell, `tar` e `kubectl`. O build instala o SDK do registry npm (o escopo `@panorama-graph`), na versão do `bun.lock`; com um registry em `localhost`, configurado num `.npmrc`, o build usa a rede do host:
+**Pelo `graph-publish`**, numa imagem no pipeline. A imagem do `Dockerfile` traz os CLIs (`graph-publish`, `graph-deployments`, `graph-seed` e `graph-receiver`), cada um empacotado pelo esbuild num arquivo só, sobre o Node com shell, `tar` e `kubectl`. O build instala o SDK do registry npm (o escopo `@panorama-graph`), na versão do `pnpm-lock.yaml`; com um registry em `localhost`, configurado num `.npmrc`, o build usa a rede do host:
 
 ```bash
 docker build --network host -t panorama-graph-publish:0.1.0 .   # na raiz deste repositório
@@ -214,7 +214,7 @@ Quem lê o pacote é o `graph-deployments`, quando vê aquele commit rodando: o 
 ## graph-receiver
 
 ```bash
-GRAPH_API_URL=http://localhost:3200 bun run graph-receiver          # porta 3210 (--port ou RECEIVER_PORT)
+GRAPH_API_URL=http://localhost:3200 pnpm run graph-receiver          # porta 3210 (--port ou RECEIVER_PORT)
 docker run -p 3210:3210 panorama-graph-publish:0.1.0 graph-receiver --api http://api:3200
 ```
 
@@ -270,8 +270,8 @@ graph-deployments --api "$GRAPH_API_URL" --cluster acme \
 ## graph-seed
 
 ```bash
-bun run graph-seed seeds/acme --dry-run          # monta os retratos e mostra o resumo
-GRAPH_API_URL=http://localhost:3200 bun run graph-seed seeds/acme
+pnpm run graph-seed seeds/acme --dry-run          # monta os retratos e mostra o resumo
+GRAPH_API_URL=http://localhost:3200 pnpm run graph-seed seeds/acme
 ```
 
 Para uma primeira carga, veja o exemplo neutro dos [primeiros passos](https://github.com/panorama-graph/panorama-graph/blob/main/PRIMEIROS-PASSOS.md#primeira-carga-à-mão); o que cada tipo aceita está no [MODELO.md](https://github.com/panorama-graph/panorama-graph/blob/main/api/MODELO.md).
@@ -315,12 +315,14 @@ O `dev` transcreve o `deploy/values-dev.yaml` de cada serviço; `stage` e `prd` 
 
 ## Desenvolvimento
 
+Node.js 22.18+ e pnpm 11 (`corepack enable`, ou `npm install -g pnpm`):
+
 ```bash
-bun install
-bun run lint   # tsc
-bun run test   # tradutores sobre artefatos reais em test/fixtures/
+pnpm install
+pnpm run lint   # tsc
+pnpm run test   # tradutores sobre artefatos reais em test/fixtures/
 ```
 
-O `example-seed` é um projeto à parte, com o próprio `package.json` e `bun.lock`: os mesmos comandos, na pasta dele.
+O `example-seed` é um projeto à parte, com o próprio `package.json` e `pnpm-lock.yaml`: os mesmos comandos, na pasta dele.
 
 Ao lado de uma instância no ar (`GRAPH_API_URL`, por padrão a porta 3200 do host), o [docker-compose.yml](docker-compose.yml) sobe o receptor (`docker compose up -d --build`), a carga de exemplo (`--profile exemplo`) e a carga à mão de `./carga` (`docker compose run --rm carga`).

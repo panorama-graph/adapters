@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -83,7 +83,7 @@ snapshots:
 });
 
 describe("carga da organização de exemplo (seeds/acme)", () => {
-  const plan = planSeed(join(import.meta.dir, "..", "seeds", "acme"), AT);
+  const plan = planSeed(join(import.meta.dirname, "..", "seeds", "acme"), AT);
 
   test("monta sem erros nem avisos", () => {
     expect(plan.errors).toEqual([]);

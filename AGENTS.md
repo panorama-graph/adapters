@@ -4,7 +4,7 @@ Este arquivo diz **como trabalhar** no repositório. **O que cada adaptador lê 
 
 ## Regras
 
-- **Um repositório, dois projetos.** A raiz são os adaptadores do produto; `example-seed/` é um projeto à parte, com o próprio `package.json`, `bun.lock` e [AGENTS.md](example-seed/AGENTS.md). Os dois dependem só do que o [panorama-graph](https://github.com/panorama-graph/panorama-graph) publica: o SDK (`@panorama-graph/sdk`, pela versão) e o contrato da API.
+- **Um repositório, dois projetos.** A raiz são os adaptadores do produto; `example-seed/` é um projeto à parte, com o próprio `package.json`, `pnpm-lock.yaml` e [AGENTS.md](example-seed/AGENTS.md). Os dois dependem só do que o [panorama-graph](https://github.com/panorama-graph/panorama-graph) publica: o SDK (`@panorama-graph/sdk`, pela versão) e o contrato da API.
 - **Exemplos copiáveis.** Um `example-*` depende só do que é publicado, para que uma organização o copie como está: o SDK pela versão exata, e nada de importar da raiz. Ao subir a versão do SDK aqui, suba a dele. O que ele tem da organização de exemplo (ACME Bank) fica nos dados (`data/`), nunca no código.
 - **Linguagem livre nos adaptadores.** Um adaptador usa a linguagem da fonte que lê. Fora do TypeScript, ele vai para um repositório próprio, com o próprio build, como o [gradle-plugin](https://github.com/panorama-graph/gradle-plugin).
 - **Genérico.** Nenhum adaptador conhece uma organização. O ACME Bank é só o exemplo: os nomes dela aparecem nas fixtures, nos testes e na carga à mão (`seeds/acme/`), nunca no código.
@@ -39,6 +39,7 @@ Este arquivo diz **como trabalhar** no repositório. **O que cada adaptador lê 
 
 ## Testes
 
-- `bun run lint` e `bun run test` precisam passar antes de entregar, aqui e em `example-seed/`.
+- Runtime: Node.js 22.18+ e pnpm 11; o TypeScript roda com tsx, os testes com Vitest, e a imagem leva cada CLI empacotado pelo esbuild (`pnpm run build`).
+- `pnpm run lint` e `pnpm run test` precisam passar antes de entregar, aqui e em `example-seed/`.
 - Os tradutores são testados sobre as fixtures reais. Para renová-las, rode `./gradlew architectureArtifacts` no serviço e copie `build/architecture/`.
 - A carga de verdade é validada contra o banco de desenvolvimento do panorama-graph-api: `--dry-run` revisado, carga, segunda carga só com `unchanged` e consulta pelo MCP. Vale para o `graph-publish`, o `graph-receiver` (pelo `architecturePublish` de um serviço real), o `graph-deployments` e o `graph-seed`.

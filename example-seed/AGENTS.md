@@ -12,6 +12,6 @@ Este arquivo diz **como trabalhar** no projeto. **O que ele lê e publica, e com
 
 ## Testes
 
-- `bun run lint` e `bun test`.
+- `pnpm run lint` e `pnpm test`.
 - `test/translate.test.ts` cobre a tradução e a conferência sobre dados neutros; `test/acme.test.ts`, os exports da organização de exemplo, e a coerência deles com o resto da carga de exemplo (`../seeds/acme/` e `../test/fixtures/`).
 - A carga de verdade é validada contra uma instância: `--dry-run`, carga, segunda carga só com `unchanged` e consulta pelo console ou pelo MCP.
