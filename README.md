@@ -22,7 +22,7 @@ Lê um diretório de artefatos do build e envia **um retrato por artefato**. O e
 |---|---|---|---|
 | `manifest.json` | [manifesto](#manifesto) | `build-manifest` | Component, Repository, `HOSTED_IN`, Technology, `BUILT_WITH {version}`, Library e `PRODUCES {version}` |
 | `bom.json` | CycloneDX (JSON) | `sbom` | Library, `DEPENDS_ON {version, scope: runtime, resolved, direct, via}` |
-| `dependency-usage/declarations.json` e `usages-dependencies.json` | relatórios brutos do [dependency-analysis-gradle-plugin](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) | `dependency-usage` | `DEPENDS_ON {declared, used, configurations}` |
+| `dependency-usage/declarations.json` e `usages-dependencies.json` | relatórios brutos do [dependency-analysis-gradle-plugin](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) | `dependency-usage` | `DEPENDS_ON {declared, used}` |
 | `openapi.json` | OpenAPI 3 ou Swagger 2 | `openapi` | Api `http`, Endpoint (nomeado `MÉTODO /caminho`, com `operationId` e `contract`: parâmetros, corpo, respostas e o fecho dos `$ref` em `components`; acima de 64 KB, sem o fecho e com aviso), `PROVIDES`, `HAS_ENDPOINT`, Contract `openapi`, `SPECIFIED_BY` |
 | `asyncapi.json` | AsyncAPI 3 ou 2 | `asyncapi` | Topic, `PUBLISHES`/`SUBSCRIBES`, Contract `asyncapi`, `SPECIFIED_BY` |
 | `http-clients.json` | [clientes HTTP](#clientes-http) | `http-clients` | `CONSUMES`, `CALLS` |

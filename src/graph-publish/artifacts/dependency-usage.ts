@@ -27,18 +27,18 @@ export type Usages = {
  *
  * Uma dependência que só agrega outras (starter, BOM de módulo) não tem classe própria e sairia "não usada".
  * Com o SBOM, ela conta como usada quando alguma biblioteca que ela traz (direta ou transitivamente) é usada.
- * As configurações em que é declarada vão em `configurations`, não em `scope`: `scope` é o classpath, que vem do SBOM.
+ * Não afirma `scope`: ele é o classpath, que vem do SBOM, e não a configuração do Gradle em que a dependência é declarada.
  */
 export function mapDependencyUsage(ctx: Context, declarations: Declaration[], usages: Usages, tree?: DependencyTree) {
   const b = builder(ctx, SOURCE);
   const evidence = artifactEvidence(ctx, "dependency-usage/usages-dependencies.json");
   const declEvidence = artifactEvidence(ctx, "dependency-usage/declarations.json");
 
-  const declared = new Map<string, string[]>();
+  const declared = new Set<string>();
   for (const d of declarations) {
     if (!MAIN_CONFIGURATIONS.includes(d.configurationName)) continue;
     if (d.gradleVariantIdentification?.attributes?.["org.gradle.category"] === "platform") continue;
-    declared.set(d.identifier, [...(declared.get(d.identifier) ?? []), d.configurationName]);
+    declared.add(d.identifier);
   }
 
   const used = new Set<string>();
@@ -53,7 +53,7 @@ export function mapDependencyUsage(ctx: Context, declarations: Declaration[], us
   };
   const usedKeys = new Set([...used].map(keyOf).filter((k): k is string => !!k));
 
-  for (const id of new Set([...declared.keys(), ...used])) {
+  for (const id of new Set([...declared, ...used])) {
     const key = keyOf(id);
     if (!key) {
       b.warn(`dependency-usage: identificador fora do formato grupo:artefato ignorado (${id})`);
@@ -68,7 +68,7 @@ export function mapDependencyUsage(ctx: Context, declarations: Declaration[], us
       "DEPENDS_ON",
       ctx.component,
       key,
-      { declared: isDeclared, used: isUsed, ...(isDeclared ? { configurations: declared.get(id)! } : {}) },
+      { declared: isDeclared, used: isUsed },
       isDeclared ? declEvidence : evidence,
     );
   }

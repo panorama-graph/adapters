@@ -92,7 +92,7 @@ describe("graph-publish sobre a product-catalog-api", () => {
 
   test("uso: starter conta como usado pelo que ele traz; lib usada sem declarar aparece", () => {
     const usage = Object.fromEntries(rel(s["dependency-usage"], "DEPENDS_ON").map((r) => [r.to, r.props]));
-    expect(usage["lib:maven/org.acme.platform:platform-starter-http-api"]).toEqual({ declared: true, used: true, configurations: ["implementation"] });
+    expect(usage["lib:maven/org.acme.platform:platform-starter-http-api"]).toEqual({ declared: true, used: true });
     expect(usage["lib:maven/org.springframework:spring-web"]).toEqual({ declared: false, used: true });
     expect(usage["lib:maven/org.acme.platform:platform-bom"]).toBeUndefined(); // BOM (platform) não é dependência de código
   });
