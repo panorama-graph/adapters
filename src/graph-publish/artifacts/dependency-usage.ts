@@ -27,6 +27,7 @@ export type Usages = {
  *
  * Uma dependência que só agrega outras (starter, BOM de módulo) não tem classe própria e sairia "não usada".
  * Com o SBOM, ela conta como usada quando alguma biblioteca que ela traz (direta ou transitivamente) é usada.
+ * As configurações em que é declarada vão em `configurations`, não em `scope`: `scope` é o classpath, que vem do SBOM.
  */
 export function mapDependencyUsage(ctx: Context, declarations: Declaration[], usages: Usages, tree?: DependencyTree) {
   const b = builder(ctx, SOURCE);
@@ -67,7 +68,7 @@ export function mapDependencyUsage(ctx: Context, declarations: Declaration[], us
       "DEPENDS_ON",
       ctx.component,
       key,
-      { declared: isDeclared, used: isUsed, ...(isDeclared ? { scope: declared.get(id)!.join(",") } : {}) },
+      { declared: isDeclared, used: isUsed, ...(isDeclared ? { configurations: declared.get(id)! } : {}) },
       isDeclared ? declEvidence : evidence,
     );
   }
