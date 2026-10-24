@@ -65,7 +65,7 @@ describe("graph-receiver", () => {
     try {
       const { receiver } = graph();
       const res = await receiver(post({ files: filesOf(fixture("product-catalog-api")), dryRun: true }));
-      expect(((await res.json()) as BuildResponse).identity.path).toBe("acme/credito/product-catalog-api");
+      expect(((await res.json()) as BuildResponse).identity.component).toBe("product-catalog");
     } finally {
       if (before === undefined) delete process.env.CI_PROJECT_PATH;
       else process.env.CI_PROJECT_PATH = before;
@@ -114,7 +114,7 @@ describe("graph-receiver", () => {
     const res = await receiver(post({ files: filesOf(fixture("product-catalog-api")) }, "text/plain"));
     const text = await res.text();
     expect(res.headers.get("content-type")).toContain("text/plain");
-    expect(text).toContain("componente acme/credito/product-catalog-api");
+    expect(text).toContain("componente product-catalog (acme/credito/product-catalog-api)");
     expect(text).toContain("openapi: nós (created 1");
   });
 

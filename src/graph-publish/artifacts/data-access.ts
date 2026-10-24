@@ -22,7 +22,7 @@ const at = (source: string, line: number | undefined) => (line ? `${source}#L${l
  */
 export function mapDataAccess(ctx: Context, doc: DataAccess) {
   const b = builder(ctx, SOURCE);
-  const key = (name: string) => datasetKey(ctx.id.path, name);
+  const key = (name: string) => datasetKey(ctx.id.component, name);
 
   for (const d of doc.datasets ?? []) {
     b.node(key(d.name), "Dataset", { name: d.name, kind: d.kind, store: d.store }, d.source);

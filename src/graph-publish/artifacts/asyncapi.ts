@@ -26,7 +26,7 @@ export type AsyncApi = {
 export function mapAsyncApi(ctx: Context, doc: AsyncApi) {
   const b = builder(ctx, SOURCE);
   const file = "asyncapi.json";
-  const contract = contractKey("asyncapi", ctx.id.service);
+  const contract = contractKey("asyncapi", ctx.id.component);
   const flows: { relation: "PUBLISHES" | "SUBSCRIBES"; channel: string; pointer: string[]; operation: unknown }[] = [];
 
   if (doc.asyncapi?.startsWith("2.")) {
@@ -57,7 +57,7 @@ export function mapAsyncApi(ctx: Context, doc: AsyncApi) {
     b.relation("SPECIFIED_BY", topic, contract, {}, artifactEvidence(ctx, file, ["channels", f.channel]));
   }
 
-  if (!b.isEmpty) b.node(contract, "Contract", { name: `AsyncAPI ${ctx.id.service}`, kind: "asyncapi" }, artifactEvidence(ctx, file));
+  if (!b.isEmpty) b.node(contract, "Contract", { name: `AsyncAPI ${ctx.id.component}`, kind: "asyncapi" }, artifactEvidence(ctx, file));
   return b;
 }
 

@@ -16,8 +16,8 @@ import { planPublish } from "../src/graph-publish/publish";
 const fixture = (name: string) => join(import.meta.dirname, "fixtures", name);
 const AT = "2026-09-29T12:00:00.000Z";
 
-const PCA = "component:acme/credito/product-catalog-api";
-const LSA = "component:acme/credito/loan-simulation-api";
+const PCA = "component:product-catalog";
+const LSA = "component:loan-simulation-api";
 
 const bySource = (snapshots: Snapshot[]) => Object.fromEntries(snapshots.map((s) => [s.source, s]));
 const rel = (s: Snapshot, type: string, to?: string) => s.relations.filter((r) => r.type === type && (!to || r.to === to));
@@ -26,15 +26,15 @@ describe("graph-publish sobre a product-catalog-api", () => {
   const plan = planPublish(fixture("product-catalog-api"), AT, { env: {} });
   const s = bySource(plan.snapshots);
 
-  test("identidade pelo manifesto: caminho do repositório, commit e nome de serviço", () => {
-    expect(plan.identity).toMatchObject({ path: "acme/credito/product-catalog-api", host: "gitlab.acmebank.example", service: "product-catalog" });
+  test("identidade: o nome do componente pelo application.json; repositório e commit pelo manifesto", () => {
+    expect(plan.identity).toMatchObject({ component: "product-catalog", repository: "acme/credito/product-catalog-api", host: "gitlab.acmebank.example" });
     expect(plan.identity.commit).toMatch(/^[0-9a-f]{40}$/);
   });
 
-  test("um retrato por fonte, com escopo = componente e evidência repo@sha", () => {
+  test("um retrato por fonte, com escopo = nome do componente e evidência repo@sha", () => {
     expect(Object.keys(s).sort()).toEqual(["asyncapi", "build-manifest", "data-access", "dependency-usage", "http-clients", "openapi", "sbom"]);
     for (const snap of plan.snapshots) {
-      expect(snap.scope).toEqual({ component: "acme/credito/product-catalog-api" });
+      expect(snap.scope).toEqual({ component: "product-catalog" });
       expect(snap.evidenceBase).toBe(`acme/credito/product-catalog-api@${plan.identity.commit}:`);
       expect(snap.observedAt).toBe(AT);
     }
@@ -47,14 +47,14 @@ describe("graph-publish sobre a product-catalog-api", () => {
     }
     const frozen = planPublish(fixture("product-catalog-api"), AT, { env: {}, frozen: true, version: "1.0.0", overrides: { commit: "abc123" } });
     for (const snap of frozen.snapshots) {
-      expect(snap.scope).toEqual({ component: "acme/credito/product-catalog-api", commit: "abc123" });
+      expect(snap.scope).toEqual({ component: "product-catalog", commit: "abc123" });
       expect(snap.revision).toEqual({ component: PCA, commit: "abc123", version: "1.0.0" });
     }
   });
 
   test("componente, repositório e stack do build", () => {
     const m = s["build-manifest"];
-    expect(m.nodes.find((n) => n.key === PCA)?.props).toEqual({ name: "product-catalog-api", kind: "service" });
+    expect(m.nodes.find((n) => n.key === PCA)?.props).toEqual({ name: "product-catalog", kind: "service" });
     expect(rel(m, "HOSTED_IN")[0].to).toBe("repo:gitlab.acmebank.example/acme/credito/product-catalog-api");
     const stack = Object.fromEntries(rel(m, "BUILT_WITH").map((r) => [r.to, r.props?.version]));
     expect(stack).toMatchObject({ "tech:java": "25", "tech:spring-boot": "4.1.0", "tech:service-platform": "1.2.0-SNAPSHOT" });
@@ -118,8 +118,8 @@ describe("graph-publish sobre a product-catalog-api", () => {
 
   test("dados: coleções mapeadas com dono, leitura e escrita com a linha do código", () => {
     const d = s["data-access"];
-    const products = "dataset:acme/credito/product-catalog-api/products";
-    const sequences = "dataset:acme/credito/product-catalog-api/sequences";
+    const products = "dataset:product-catalog/products";
+    const sequences = "dataset:product-catalog/sequences";
     expect(d.nodes.map((n) => n.key).sort()).toEqual([products, sequences]);
     expect(d.nodes.find((n) => n.key === products)!.props).toEqual({ name: "products", kind: "collection", store: "document" });
     expect(rel(d, "OWNS_DATA").map((r) => r.to).sort()).toEqual([products, sequences]);
@@ -221,7 +221,7 @@ describe("graph-publish sobre a loan-simulation-api", () => {
 
   test("dados: a coleção de simulações", () => {
     const d = s["data-access"];
-    const simulations = "dataset:acme/credito/loan-simulation-api/simulations";
+    const simulations = "dataset:loan-simulation-api/simulations";
     expect(rel(d, "OWNS_DATA").map((r) => r.to)).toEqual([simulations]);
     expect(rel(d, "READS").map((r) => r.to)).toEqual([simulations]);
     expect(rel(d, "WRITES").map((r) => r.to)).toEqual([simulations]);
@@ -231,13 +231,13 @@ describe("graph-publish sobre a loan-simulation-api", () => {
     const ci = planPublish(fixture("loan-simulation-api"), AT, {
       env: { CI_PROJECT_PATH: "grupo/outro", CI_SERVER_HOST: "gitlab.exemplo.com", CI_COMMIT_SHA: "abc123", CI_PROJECT_URL: "https://gitlab.exemplo.com/grupo/outro" },
     });
-    expect(ci.identity).toMatchObject({ path: "grupo/outro", host: "gitlab.exemplo.com", commit: "abc123", service: "loan-simulation-api" });
+    expect(ci.identity).toMatchObject({ component: "loan-simulation-api", repository: "grupo/outro", host: "gitlab.exemplo.com", commit: "abc123" });
     expect(ci.snapshots[0].evidenceBase).toBe("grupo/outro@abc123:");
   });
 });
 
 describe("pacotes que o build gera", () => {
-  const ctx = createContext({ path: "example/platform/framework", host: "git.example.com", commit: "abc123", service: "framework" }, { kind: "library" });
+  const ctx = createContext({ component: "framework", repository: "example/platform/framework", host: "git.example.com", commit: "abc123" }, { kind: "library" });
 
   test("cada pacote do manifesto vira PRODUCES, com a versão do purl", () => {
     const b = mapManifest(ctx, {
@@ -245,7 +245,7 @@ describe("pacotes que o build gera", () => {
       packages: [{ purl: "pkg:maven/org.example.framework/framework-web@2.1.0" }, { purl: "pkg:npm/%40example/ui@2.1.0" }],
     });
     const snap = b.build(AT);
-    expect(snap.nodes.find((n) => n.key === "component:example/platform/framework")?.props).toEqual({ name: "framework", kind: "library" });
+    expect(snap.nodes.find((n) => n.key === "component:framework")?.props).toEqual({ name: "framework", kind: "library" });
     expect(rel(snap, "PRODUCES").map((r) => [r.to, r.props])).toEqual([
       ["lib:maven/org.example.framework:framework-web", { version: "2.1.0" }],
       ["lib:npm/@example/ui", { version: "2.1.0" }],
@@ -265,7 +265,7 @@ describe("pacotes que o build gera", () => {
 });
 
 describe("data-access", () => {
-  const ctx = createContext({ path: "acme/x/servico", host: "localhost", commit: "abc", service: "servico" } as never);
+  const ctx = createContext({ component: "servico", repository: "acme/x/servico", host: "localhost", commit: "abc" } as never);
 
   test("dataset de biblioteca ou só citado não tem dono; o que não resolveu vira aviso", () => {
     const b = mapDataAccess(ctx, {
@@ -281,8 +281,8 @@ describe("data-access", () => {
     });
     const snap = b.build(AT);
     expect(rel(snap, "OWNS_DATA")).toEqual([]);
-    expect(rel(snap, "READS").map((r) => r.to).sort()).toEqual(["dataset:acme/x/servico/audit_log", "dataset:acme/x/servico/shared"]);
-    expect(rel(snap, "WRITES").map((r) => [r.to, r.evidence])).toEqual([["dataset:acme/x/servico/audit_log", "src/main/java/B.java#L20"]]);
+    expect(rel(snap, "READS").map((r) => r.to).sort()).toEqual(["dataset:servico/audit_log", "dataset:servico/shared"]);
+    expect(rel(snap, "WRITES").map((r) => [r.to, r.evidence])).toEqual([["dataset:servico/audit_log", "src/main/java/B.java#L20"]]);
     expect(b.warnings).toEqual(["data-access: nome da colecao em variavel (src/main/java/C.java#L30)"]);
   });
 });
@@ -305,7 +305,7 @@ describe("contrato de operação (OpenAPI)", () => {
   test("contrato grande vai sem o fecho, com aviso", () => {
     const big = { type: "string", description: "x".repeat(MAX_CONTRACT_CHARS) };
     const doc = { openapi: "3.1.0", paths: { "/x": { get: { responses: { "200": { content: { "*/*": { schema: { $ref: "#/components/schemas/Big" } } } } } } } }, components: { schemas: { Big: big } } };
-    const ctx = createContext({ path: "g/x", host: "h", commit: "c", service: "x" } as never);
+    const ctx = createContext({ component: "x", repository: "g/x", host: "h", commit: "c" } as never);
     const b = mapOpenApi(ctx, doc);
     const c = JSON.parse(b.build(AT).nodes.find((n) => n.type === "Endpoint")!.props!.contract as string);
     expect(c.components).toBeUndefined();
@@ -315,7 +315,7 @@ describe("contrato de operação (OpenAPI)", () => {
 });
 
 describe("x-panorama-graph-source: evidência no código, para contrato gerado sem o build", () => {
-  const ctx = createContext({ path: "g/orders", host: "h", commit: "c", service: "orders" } as never);
+  const ctx = createContext({ component: "orders", repository: "g/orders", host: "h", commit: "c" } as never);
   const X = "x-panorama-graph-source";
   const ev = (snap: Snapshot, type: string) => rel(snap, type).map((r) => [r.to, r.evidence]);
 
@@ -399,7 +399,7 @@ describe("x-panorama-graph-source: evidência no código, para contrato gerado s
 });
 
 describe("versões de APIs e tópicos", () => {
-  const ctx = (service: string) => createContext({ path: "g/orders", host: "h", commit: "c", service } as never);
+  const ctx = (service: string) => createContext({ component: service, repository: "g/orders", host: "h", commit: "c" } as never);
   const nodes = (snap: Snapshot, type: string) => snap.nodes.filter((n) => n.type === type).map((n) => [n.key, n.props?.version]);
 
   test("OpenAPI versionado no código: uma API por versão do caminho; o que não tem versão fica na API sem versão", () => {

@@ -16,15 +16,15 @@ snapshots:
       - { key: system:bancos-de-dados, name: Bancos de Dados, description: "Servidores de banco e de cache compartilhados pelos serviços, implantados em cada ambiente", evidence: systems/bancos-de-dados }
       - { key: system:mensageria, name: Mensageria, description: "Broker de eventos entre os serviços, implantado em cada ambiente", evidence: systems/mensageria }
 
-      - { key: component:acme/platform/service-platform, kind: library, name: service-platform, description: "Biblioteca interna Java/Spring dos serviços: starters, BOM e plugin Gradle", evidence: components/service-platform }
-      - { key: component:acme/platform/gitlab-ci-templates, kind: library, name: gitlab-ci-templates, description: "Templates de pipeline do GitLab CI", evidence: components/gitlab-ci-templates }
-      - { key: component:acme/platform/helm-charts/java-service-helm, kind: library, name: java-service-helm, description: "Chart Helm padrão dos serviços Java", evidence: components/java-service-helm }
-      - { key: component:acme/platform/helm-charts/web-app-helm, kind: library, name: web-app-helm, description: "Chart Helm padrão das aplicações web", evidence: components/web-app-helm }
+      - { key: component:service-platform, kind: library, name: service-platform, description: "Biblioteca interna Java/Spring dos serviços: starters, BOM e plugin Gradle", evidence: components/service-platform }
+      - { key: component:gitlab-ci-templates, kind: library, name: gitlab-ci-templates, description: "Templates de pipeline do GitLab CI", evidence: components/gitlab-ci-templates }
+      - { key: component:java-service-helm, kind: library, name: java-service-helm, description: "Chart Helm padrão dos serviços Java", evidence: components/java-service-helm }
+      - { key: component:web-app-helm, kind: library, name: web-app-helm, description: "Chart Helm padrão das aplicações web", evidence: components/web-app-helm }
 
-      - { key: component:acme/infra/mongodb, kind: infra, name: mongodb, description: "Servidor MongoDB compartilhado, com um banco por serviço", evidence: components/mongodb }
-      - { key: component:acme/infra/postgresql, kind: infra, name: postgresql, description: "Servidor PostgreSQL das aplicações, com um schema por serviço", evidence: components/postgresql }
-      - { key: component:acme/infra/redis, kind: infra, name: redis, description: "Redis das aplicações: cache, idempotência, limite de taxa e Redis Streams", evidence: components/redis }
-      - { key: component:acme/infra/kafka, kind: infra, name: kafka, description: "Broker Kafka dos eventos entre os serviços", evidence: components/kafka }
+      - { key: component:mongodb, kind: infra, name: mongodb, description: "Servidor MongoDB compartilhado, com um banco por serviço", evidence: components/mongodb }
+      - { key: component:postgresql, kind: infra, name: postgresql, description: "Servidor PostgreSQL das aplicações, com um schema por serviço", evidence: components/postgresql }
+      - { key: component:redis, kind: infra, name: redis, description: "Redis das aplicações: cache, idempotência, limite de taxa e Redis Streams", evidence: components/redis }
+      - { key: component:kafka, kind: infra, name: kafka, description: "Broker Kafka dos eventos entre os serviços", evidence: components/kafka }
 
       - { key: repo:gitlab.acmebank.example/acme/platform/service-platform, url: "https://gitlab.acmebank.example/acme/platform/service-platform", evidence: components/service-platform }
       - { key: repo:gitlab.acmebank.example/acme/platform/gitlab-ci-templates, url: "https://gitlab.acmebank.example/acme/platform/gitlab-ci-templates", evidence: components/gitlab-ci-templates }
@@ -51,33 +51,33 @@ snapshots:
       - { type: OWNED_BY, from: system:mensageria, to: group:time-runtime-infraestrutura, evidence: systems/mensageria }
 
       # Serviços de crédito
-      - { type: PART_OF, from: component:acme/credito/loan-simulation-api, to: system:simulacao-de-credito, evidence: components/loan-simulation-api }
-      - { type: OWNED_BY, from: component:acme/credito/loan-simulation-api, to: group:squad-simulacao-credito, evidence: components/loan-simulation-api }
+      - { type: PART_OF, from: component:loan-simulation-api, to: system:simulacao-de-credito, evidence: components/loan-simulation-api }
+      - { type: OWNED_BY, from: component:loan-simulation-api, to: group:squad-simulacao-credito, evidence: components/loan-simulation-api }
       - { type: OWNED_BY, from: api:loan-simulation-api/http, to: group:squad-simulacao-credito, evidence: components/loan-simulation-api }
-      - { type: PART_OF, from: component:acme/credito/product-catalog-api, to: system:catalogo-de-produtos-de-credito, evidence: components/product-catalog-api }
-      - { type: OWNED_BY, from: component:acme/credito/product-catalog-api, to: group:squad-catalogo-produtos, evidence: components/product-catalog-api }
-      - { type: OWNED_BY, from: api:product-catalog-api/http, to: group:squad-catalogo-produtos, evidence: components/product-catalog-api }
+      - { type: PART_OF, from: component:product-catalog, to: system:catalogo-de-produtos-de-credito, evidence: components/product-catalog-api }
+      - { type: OWNED_BY, from: component:product-catalog, to: group:squad-catalogo-produtos, evidence: components/product-catalog-api }
+      - { type: OWNED_BY, from: api:product-catalog/http, to: group:squad-catalogo-produtos, evidence: components/product-catalog-api }
 
       # Plataforma
-      - { type: PART_OF, from: component:acme/platform/service-platform, to: system:plataforma-de-desenvolvimento, evidence: components/service-platform }
-      - { type: OWNED_BY, from: component:acme/platform/service-platform, to: group:time-developer-experience, evidence: components/service-platform }
-      - { type: HOSTED_IN, from: component:acme/platform/service-platform, to: repo:gitlab.acmebank.example/acme/platform/service-platform, evidence: components/service-platform }
-      - { type: PART_OF, from: component:acme/platform/gitlab-ci-templates, to: system:plataforma-de-desenvolvimento, evidence: components/gitlab-ci-templates }
-      - { type: OWNED_BY, from: component:acme/platform/gitlab-ci-templates, to: group:time-developer-experience, evidence: components/gitlab-ci-templates }
-      - { type: HOSTED_IN, from: component:acme/platform/gitlab-ci-templates, to: repo:gitlab.acmebank.example/acme/platform/gitlab-ci-templates, evidence: components/gitlab-ci-templates }
-      - { type: PART_OF, from: component:acme/platform/helm-charts/java-service-helm, to: system:plataforma-de-desenvolvimento, evidence: components/java-service-helm }
-      - { type: OWNED_BY, from: component:acme/platform/helm-charts/java-service-helm, to: group:time-developer-experience, evidence: components/java-service-helm }
-      - { type: HOSTED_IN, from: component:acme/platform/helm-charts/java-service-helm, to: repo:gitlab.acmebank.example/acme/platform/helm-charts/java-service-helm, evidence: components/java-service-helm }
-      - { type: PART_OF, from: component:acme/platform/helm-charts/web-app-helm, to: system:plataforma-de-desenvolvimento, evidence: components/web-app-helm }
-      - { type: OWNED_BY, from: component:acme/platform/helm-charts/web-app-helm, to: group:time-developer-experience, evidence: components/web-app-helm }
-      - { type: HOSTED_IN, from: component:acme/platform/helm-charts/web-app-helm, to: repo:gitlab.acmebank.example/acme/platform/helm-charts/web-app-helm, evidence: components/web-app-helm }
+      - { type: PART_OF, from: component:service-platform, to: system:plataforma-de-desenvolvimento, evidence: components/service-platform }
+      - { type: OWNED_BY, from: component:service-platform, to: group:time-developer-experience, evidence: components/service-platform }
+      - { type: HOSTED_IN, from: component:service-platform, to: repo:gitlab.acmebank.example/acme/platform/service-platform, evidence: components/service-platform }
+      - { type: PART_OF, from: component:gitlab-ci-templates, to: system:plataforma-de-desenvolvimento, evidence: components/gitlab-ci-templates }
+      - { type: OWNED_BY, from: component:gitlab-ci-templates, to: group:time-developer-experience, evidence: components/gitlab-ci-templates }
+      - { type: HOSTED_IN, from: component:gitlab-ci-templates, to: repo:gitlab.acmebank.example/acme/platform/gitlab-ci-templates, evidence: components/gitlab-ci-templates }
+      - { type: PART_OF, from: component:java-service-helm, to: system:plataforma-de-desenvolvimento, evidence: components/java-service-helm }
+      - { type: OWNED_BY, from: component:java-service-helm, to: group:time-developer-experience, evidence: components/java-service-helm }
+      - { type: HOSTED_IN, from: component:java-service-helm, to: repo:gitlab.acmebank.example/acme/platform/helm-charts/java-service-helm, evidence: components/java-service-helm }
+      - { type: PART_OF, from: component:web-app-helm, to: system:plataforma-de-desenvolvimento, evidence: components/web-app-helm }
+      - { type: OWNED_BY, from: component:web-app-helm, to: group:time-developer-experience, evidence: components/web-app-helm }
+      - { type: HOSTED_IN, from: component:web-app-helm, to: repo:gitlab.acmebank.example/acme/platform/helm-charts/web-app-helm, evidence: components/web-app-helm }
 
       # Infraestrutura
-      - { type: PART_OF, from: component:acme/infra/mongodb, to: system:bancos-de-dados, evidence: components/mongodb }
-      - { type: OWNED_BY, from: component:acme/infra/mongodb, to: group:time-runtime-infraestrutura, evidence: components/mongodb }
-      - { type: PART_OF, from: component:acme/infra/postgresql, to: system:bancos-de-dados, evidence: components/postgresql }
-      - { type: OWNED_BY, from: component:acme/infra/postgresql, to: group:time-runtime-infraestrutura, evidence: components/postgresql }
-      - { type: PART_OF, from: component:acme/infra/redis, to: system:bancos-de-dados, evidence: components/redis }
-      - { type: OWNED_BY, from: component:acme/infra/redis, to: group:time-runtime-infraestrutura, evidence: components/redis }
-      - { type: PART_OF, from: component:acme/infra/kafka, to: system:mensageria, evidence: components/kafka }
-      - { type: OWNED_BY, from: component:acme/infra/kafka, to: group:time-runtime-infraestrutura, evidence: components/kafka }
+      - { type: PART_OF, from: component:mongodb, to: system:bancos-de-dados, evidence: components/mongodb }
+      - { type: OWNED_BY, from: component:mongodb, to: group:time-runtime-infraestrutura, evidence: components/mongodb }
+      - { type: PART_OF, from: component:postgresql, to: system:bancos-de-dados, evidence: components/postgresql }
+      - { type: OWNED_BY, from: component:postgresql, to: group:time-runtime-infraestrutura, evidence: components/postgresql }
+      - { type: PART_OF, from: component:redis, to: system:bancos-de-dados, evidence: components/redis }
+      - { type: OWNED_BY, from: component:redis, to: group:time-runtime-infraestrutura, evidence: components/redis }
+      - { type: PART_OF, from: component:kafka, to: system:mensageria, evidence: components/kafka }
+      - { type: OWNED_BY, from: component:kafka, to: group:time-runtime-infraestrutura, evidence: components/kafka }

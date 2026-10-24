@@ -38,11 +38,11 @@ export type OpenApi = {
 export function mapOpenApi(ctx: Context, doc: OpenApi) {
   const b = builder(ctx, SOURCE);
   const file = "openapi.json";
-  const contract = contractKey("openapi", ctx.id.service);
+  const contract = contractKey("openapi", ctx.id.component);
   const declared = sourceEvidence(b, SOURCE, doc.info, "", "info");
-  b.node(contract, "Contract", { name: `OpenAPI ${ctx.id.service}`, kind: "openapi" }, artifactEvidence(ctx, file));
+  b.node(contract, "Contract", { name: `OpenAPI ${ctx.id.component}`, kind: "openapi" }, artifactEvidence(ctx, file));
 
-  const service = ctx.id.service;
+  const service = ctx.id.component;
   const apiVersion = declaredVersion(b, SOURCE, doc.info, "info");
   const apis = new Set<string>();
   const apiOf = (version?: string) => {

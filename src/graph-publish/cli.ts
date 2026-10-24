@@ -14,10 +14,10 @@ Uso: graph-publish [diretório] [opções]
   --api <url>          URL do panorama-graph-api (ou GRAPH_API_URL)
   --dry-run            monta os retratos e mostra o resumo, sem enviar
   --print              com --dry-run, imprime os retratos em JSON
-  --component <path>   caminho do repositório (padrão: CI_PROJECT_PATH, GITHUB_REPOSITORY ou o manifest.json)
+  --component <nome>   nome do componente, a chave no grafo (padrão: application.json ou o fim do caminho do repositório)
+  --repository <path>  caminho do repositório (padrão: CI_PROJECT_PATH, GITHUB_REPOSITORY ou o manifest.json)
   --host <host>        host do repositório (padrão: CI_SERVER_HOST, GITHUB_SERVER_URL ou o manifest.json)
   --commit <sha>       commit (padrão: CI_COMMIT_SHA, GITHUB_SHA ou o manifest.json)
-  --service <nome>     nome do serviço para os clientes (padrão: application.json ou o fim do caminho)
   --kind <kind>        kind do Component: service, bff, frontend, job, library (padrão: service)
   --evidence-dir <p>   caminho do diretório de artefatos a partir da raiz do repositório (padrão: build/architecture)
   --observed-at <iso>  quando o build viu os fatos (padrão: agora)
@@ -36,9 +36,9 @@ async function main(): Promise<number> {
       "dry-run": { type: "boolean" },
       print: { type: "boolean" },
       component: { type: "string" },
+      repository: { type: "string" },
       host: { type: "string" },
       commit: { type: "string" },
-      service: { type: "string" },
       kind: { type: "string" },
       "evidence-dir": { type: "string" },
       "observed-at": { type: "string" },
@@ -55,7 +55,7 @@ async function main(): Promise<number> {
   const dir = positionals[0] ?? "build/architecture";
   const observedAt = values["observed-at"] ?? new Date().toISOString();
   const plan = planPublish(dir, observedAt, {
-    overrides: { path: values.component, host: values.host, commit: values.commit, service: values.service },
+    overrides: { component: values.component, repository: values.repository, host: values.host, commit: values.commit },
     kind: values.kind,
     artifactsDir: values["evidence-dir"],
     version: values.version,

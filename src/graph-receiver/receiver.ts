@@ -17,9 +17,9 @@ export type BuildRequest = {
     evidenceDir?: string;
     observedAt?: string;
     component?: string;
+    repository?: string;
     host?: string;
     commit?: string;
-    service?: string;
   };
   /** Monta e confere os retratos, sem gravar. */
   dryRun?: boolean;
@@ -87,7 +87,7 @@ export function createReceiver(opts: ReceiverOptions): (req: Request) => Promise
     try {
       plan = planPublish(mapFiles(body.files), o.observedAt ?? now().toISOString(), {
         env: {},
-        overrides: { path: o.component, host: o.host, commit: o.commit, service: o.service },
+        overrides: { component: o.component, repository: o.repository, host: o.host, commit: o.commit },
         kind: o.kind,
         version: o.version,
         artifactsDir: o.evidenceDir,
@@ -104,7 +104,7 @@ export function createReceiver(opts: ReceiverOptions): (req: Request) => Promise
       try {
         await opts.client.assertModel();
       } catch (e) {
-        log(`${plan.identity.path}: grafo indisponível (${e instanceof Error ? e.message : String(e)})`);
+        log(`${plan.identity.component}: grafo indisponível (${e instanceof Error ? e.message : String(e)})`);
         return error(502, "graph_unavailable", `O panorama-graph-api não respondeu: ${e instanceof Error ? e.message : String(e)}`, undefined, text);
       }
       status = "published";
@@ -115,7 +115,7 @@ export function createReceiver(opts: ReceiverOptions): (req: Request) => Promise
           report.push(outcomeLine(s.source, outcome));
         } catch (e) {
           if (!(e instanceof PanoramaGraphError)) {
-            log(`${plan.identity.path}: grafo indisponível no meio da carga (${e instanceof Error ? e.message : String(e)})`);
+            log(`${plan.identity.component}: grafo indisponível no meio da carga (${e instanceof Error ? e.message : String(e)})`);
             return error(502, "graph_unavailable", `O panorama-graph-api parou de responder no retrato ${s.source}: ${e instanceof Error ? e.message : String(e)}`, undefined, text);
           }
           status = "rejected";
@@ -128,7 +128,7 @@ export function createReceiver(opts: ReceiverOptions): (req: Request) => Promise
     report.push(...plan.warnings.map((w) => `  aviso: ${w}`));
 
     const id = plan.identity;
-    log(`${id.path} @ ${id.commit.slice(0, 12)}: ${status} (${plan.snapshots.length} retrato(s))`);
+    log(`${id.component} @ ${id.commit.slice(0, 12)}: ${status} (${plan.snapshots.length} retrato(s))`);
     const res: BuildResponse = { status, identity: id, snapshots, skipped: plan.skipped, warnings: plan.warnings, report };
     const code = status === "rejected" ? 422 : 200;
     if (text) return new Response(`${report.join("\n")}\n`, { status: code, headers: { "content-type": "text/plain; charset=utf-8" } });

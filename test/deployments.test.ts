@@ -10,7 +10,7 @@ import { imageTag, planDeployments, type K8sDeployment, type K8sNamespace, type 
 import { publishDeployments } from "../src/graph-deployments/publish";
 
 const observedAt = "2026-10-18T12:00:00.000Z";
-const CATALOG = "acme/credito/product-catalog-api";
+const CATALOG = "product-catalog";
 
 const deployment = (ns: string, name: string, opts: { component?: string; commit?: string; version?: string; image?: string; replicas?: number } = {}): K8sDeployment => ({
   metadata: {
@@ -31,7 +31,7 @@ const cluster = {
     items: [
       deployment("dev", "product-catalog-api", { component: CATALOG, commit: "aaa111", version: "1.1.0-SNAPSHOT", image: "registry.acmebank.example:5000/pca:1.1.0-SNAPSHOT-aaa111", replicas: 1 }),
       deployment("dev", "apicurio-registry"),
-      deployment("dev", "sem-commit", { component: "acme/credito/sem-commit" }),
+      deployment("dev", "sem-commit", { component: "sem-commit" }),
       // Canário em prd: duas versões do mesmo componente.
       deployment("prd", "product-catalog-api", { component: CATALOG, commit: "bbb222", image: "registry.acmebank.example:5000/pca:1.0.0" }),
       deployment("prd", "product-catalog-api-canary", { component: CATALOG, commit: "ccc333", version: "1.1.0", replicas: 1 }),
@@ -173,7 +173,8 @@ describe("publicação das implantações", () => {
     for (const s of frozen) {
       expect(s.scope).toEqual({ component: CATALOG, commit: "aaa111" });
       expect(s.revision).toEqual({ component: `component:${CATALOG}`, commit: "aaa111", version: "1.1.0-SNAPSHOT" });
-      expect(s.evidenceBase).toBe(`${CATALOG}@aaa111:`);
+      // A evidência é do repositório, que vem do manifesto do pacote; a anotação dá só o nome do componente.
+      expect(s.evidenceBase).toBe("acme/credito/product-catalog-api@aaa111:");
       expect(s.producer).toEqual({ ...PRODUCER });
     }
     expect(deployments.map((s) => s.scope.namespace)).toEqual(["dev", "prd", "stage"]);
@@ -203,7 +204,7 @@ describe("publicação das implantações", () => {
 });
 
 describe("versões expostas na infraestrutura", () => {
-  const STOCK = "example/stock/stock-api";
+  const STOCK = "stock-api";
   const withPods = (d: K8sDeployment, labels: Record<string, string>): K8sDeployment => ({
     ...d,
     spec: { ...d.spec, template: { ...d.spec?.template, metadata: { labels } } },

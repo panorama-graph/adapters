@@ -27,7 +27,7 @@ Uso: graph-deployments [opções]
   --dry-run              mostra o que seria publicado, sem enviar
   --observed-at <iso>    quando o cluster foi lido (padrão: agora)
 
-Anotações no Deployment: ${ANNOTATIONS.component} (caminho do repositório), ${ANNOTATIONS.commit} (commit) e o
+Anotações no Deployment: ${ANNOTATIONS.component} (nome do componente), ${ANNOTATIONS.commit} (commit) e o
 label ${LABELS.version} (versão; sem ele, a tag da imagem). No namespace: ${LABELS.environment} (nome do ambiente;
 marca o namespace como ambiente) e ${LABELS.environmentKind} (development, test, staging, production).
 

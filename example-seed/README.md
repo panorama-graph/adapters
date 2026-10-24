@@ -65,11 +65,11 @@ services:                              # o mesmo conjunto em todos os ambientes
     type: database-server
     engine: { name: postgresql, version: "17" }
     workload: statefulsets/postgresql  # onde o cluster o declara: é a evidência
-    component: acme/infra/postgresql   # INSTANCE_OF (opcional)
+    component: postgresql   # INSTANCE_OF (opcional)
     databases:
       - { name: acme, declaredIn: "statefulsets/postgresql#env.POSTGRES_DB" }
 routes:
-  - { ingress: ingress-nginx, name: product-catalog-api, host: "product-catalog-api.{environment}.acmebank.example", path: /, component: acme/credito/product-catalog-api }
+  - { ingress: ingress-nginx, name: product-catalog-api, host: "product-catalog-api.{environment}.acmebank.example", path: /, component: product-catalog-api }
 ```
 
 O nome do ambiente é livre (`hml`, `qa`, `prd`); o estágio (`stage`) é um dos fixos do modelo: `development`, `test`, `staging`, `production`.

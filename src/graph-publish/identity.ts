@@ -1,5 +1,5 @@
 /**
- * Quem é o componente que está publicando: caminho do repositório, host, commit e nome de serviço.
+ * Quem é o componente que está publicando: o nome, o repositório (host e caminho) e o commit.
  * Vem do manifesto do build e das variáveis do CI (GitLab ou GitHub), com as opções do CLI por cima.
  */
 
@@ -13,19 +13,22 @@ export type Manifest = {
 };
 
 export type Identity = {
-  /** Caminho do repositório no provedor (ex.: `acme/credito/product-catalog-api`): a chave do componente. */
-  path: string;
+  /**
+   * Nome do componente, único na organização: a chave (`component:<nome>`) e o nome com que os clientes o conhecem
+   * (participante nos pacts, grupo dos clientes HTTP), que nomeia a API e os endpoints.
+   */
+  component: string;
+  /** Caminho do repositório no provedor (ex.: `acme/credito/product-catalog-api`): com o host, a chave do repositório. */
+  repository: string;
   /** Host do provedor, sem usuário nem porta (ex.: `gitlab.acmebank.example`). */
   host: string;
   /** URL do repositório, como o CI ou o `git remote` a conhecem. */
   url?: string;
   commit: string;
-  /** Nome com que os clientes conhecem o serviço (participante nos pacts, grupo dos clientes HTTP). */
-  service: string;
   version?: string;
 };
 
-export type IdentityOverrides = { path?: string; host?: string; commit?: string; service?: string };
+export type IdentityOverrides = { component?: string; repository?: string; host?: string; commit?: string };
 
 type Env = Record<string, string | undefined>;
 
@@ -52,7 +55,7 @@ export function resolveIdentity(
   const ciHost = env.CI_SERVER_HOST ?? (env.GITHUB_SERVER_URL ? new URL(env.GITHUB_SERVER_URL).hostname : undefined);
   const ciPath = env.CI_PROJECT_PATH ?? env.GITHUB_REPOSITORY;
 
-  const path = overrides.path ?? ciPath ?? fromManifest?.path;
+  const path = overrides.repository ?? ciPath ?? fromManifest?.path;
   const host = overrides.host ?? ciHost ?? fromManifest?.host;
   const commit = overrides.commit ?? env.CI_COMMIT_SHA ?? env.GITHUB_SHA ?? manifest?.component?.commit;
   const url =
@@ -64,9 +67,9 @@ export function resolveIdentity(
   if (missing.length) {
     throw new Error(
       `Não foi possível identificar o componente (${missing.join(", ")}). ` +
-        "Rode no CI, gere o manifest.json num repositório git ou informe --component, --host e --commit.",
+        "Rode no CI, gere o manifest.json num repositório git ou informe --repository, --host e --commit.",
     );
   }
-  const service = overrides.service ?? applicationName ?? path!.split("/").pop()!;
-  return { path: path!, host: host!, commit: commit!, service, ...(url ? { url } : {}), ...(manifest?.component?.version ? { version: manifest.component.version } : {}) };
+  const component = overrides.component ?? applicationName ?? path!.split("/").pop()!;
+  return { component, repository: path!, host: host!, commit: commit!, ...(url ? { url } : {}), ...(manifest?.component?.version ? { version: manifest.component.version } : {}) };
 }

@@ -55,9 +55,12 @@ describe("exports da organização de exemplo (data/acme)", () => {
     const owners: string[] = catalog.relations.filter((r: any) => r.type === "OWNED_BY").map((r: any) => r.to);
     expect(owners.filter((g) => !groups.has(g))).toEqual([]);
 
+    // O nome do componente é o do application.json e, sem ele, o fim do caminho do repositório (a regra do graph-publish).
     const built = readdirSync(builds).map((d) => {
+      const application = join(builds, d, "application.json");
+      if (existsSync(application)) return `component:${JSON.parse(readFileSync(application, "utf8")).name}`;
       const { component } = JSON.parse(readFileSync(join(builds, d, "manifest.json"), "utf8"));
-      return `component:${new URL(component.repository).pathname.slice(1).replace(/\.git$/, "")}`;
+      return `component:${new URL(component.repository).pathname.replace(/\.git$/, "").split("/").pop()}`;
     });
     const declared = yaml.flatMap((s) => (s.nodes ?? []).map((n: any) => n.key as string)).filter((k) => k.startsWith("component:"));
     const components = new Set([...declared, ...built]);

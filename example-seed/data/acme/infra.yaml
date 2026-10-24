@@ -14,14 +14,14 @@ services:
     description: MongoDB
     engine: { name: mongodb, version: "8.0" }
     workload: statefulsets/mongodb
-    component: acme/infra/mongodb
+    component: mongodb
 
   - name: postgresql
     type: database-server
     description: PostgreSQL das aplicações (um schema por serviço)
     engine: { name: postgresql, version: "17" }
     workload: statefulsets/postgresql
-    component: acme/infra/postgresql
+    component: postgresql
     databases:
       - { name: acme, description: "Banco das aplicações, um schema por serviço", declaredIn: "statefulsets/postgresql#env.POSTGRES_DB" }
 
@@ -30,14 +30,14 @@ services:
     description: Kafka
     engine: { name: kafka, version: "7.7.1" }
     workload: statefulsets/kafka
-    component: acme/infra/kafka
+    component: kafka
 
   - name: redis
     type: cache
     description: Redis das aplicações (cache, idempotência e limite de taxa)
     engine: { name: redis, version: "7.4" }
     workload: statefulsets/redis
-    component: acme/infra/redis
+    component: redis
 
   - name: ingress-nginx
     type: ingress
@@ -51,7 +51,7 @@ services:
     description: PostgreSQL do Apicurio Registry e do execution-plane
     engine: { name: postgresql, version: "17" }
     workload: statefulsets/apicurio-postgresql
-    component: acme/infra/postgresql
+    component: postgresql
     databases:
       - name: executionplanedb
         description: Banco do execution-plane (schema execution_plane)
@@ -60,5 +60,5 @@ services:
 
 # Rotas de entrada em cada ambiente; {environment} vira o nome do ambiente.
 routes:
-  - { ingress: ingress-nginx, name: product-catalog-api, host: "product-catalog-api.{environment}.acmebank.example", path: /, component: acme/credito/product-catalog-api }
-  - { ingress: ingress-nginx, name: loan-simulation-api, host: "loan-simulation-api.{environment}.acmebank.example", path: /, component: acme/credito/loan-simulation-api }
+  - { ingress: ingress-nginx, name: product-catalog-api, host: "product-catalog-api.{environment}.acmebank.example", path: /, component: product-catalog }
+  - { ingress: ingress-nginx, name: loan-simulation-api, host: "loan-simulation-api.{environment}.acmebank.example", path: /, component: loan-simulation-api }

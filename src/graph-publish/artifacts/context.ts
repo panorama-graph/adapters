@@ -16,16 +16,17 @@ export type Context = {
 
 export function createContext(id: Identity, opts: { artifactsDir?: string; kind?: string; frozen?: boolean } = {}): Context {
   const artifactsDir = (opts.artifactsDir ?? "build/architecture").replace(/\/$/, "");
-  return { id, component: componentKey(id.path), artifactsDir, kind: opts.kind ?? "service", frozen: !!opts.frozen };
+  return { id, component: componentKey(id.component), artifactsDir, kind: opts.kind ?? "service", frozen: !!opts.frozen };
 }
 
 /**
- * Um retrato por fonte, com escopo = o componente (e o commit, no retrato congelado) e evidência `repo@sha:`. A
+ * Um retrato por fonte, com escopo = o nome do componente (e o commit, no retrato congelado) e evidência `repo@sha:`,
+ * pelo caminho do repositório. A
  * evidência de cada fato é o caminho do artefato (ou do código), relativo à raiz do repositório.
  */
 export function builder(ctx: Context, source: string): SnapshotBuilder {
-  const scope: Record<string, string> = ctx.frozen ? { component: ctx.id.path, commit: ctx.id.commit } : { component: ctx.id.path };
-  return new SnapshotBuilder(source, scope, `${ctx.id.path}@${ctx.id.commit}:`);
+  const scope: Record<string, string> = ctx.frozen ? { component: ctx.id.component, commit: ctx.id.commit } : { component: ctx.id.component };
+  return new SnapshotBuilder(source, scope, `${ctx.id.repository}@${ctx.id.commit}:`);
 }
 
 /** Evidência dentro de um artefato, com ponteiro JSON opcional (`build/architecture/openapi.json#/paths/...`). */

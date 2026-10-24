@@ -32,9 +32,9 @@ export function mapPacts(ctx: Context, pacts: { file: string; pact: Pact }[], op
     const http = (pact.interactions ?? []).filter((i) => !i.type || /http/i.test(i.type));
     if (http.length === 0) continue; // pact de mensagens: fica para o AsyncAPI
 
-    const contract = contractKey("pact", `${pact.consumer?.name ?? ctx.id.service}→${provider}`);
+    const contract = contractKey("pact", `${pact.consumer?.name ?? ctx.id.component}→${provider}`);
     const path = `pacts/${file}`;
-    b.node(contract, "Contract", { name: `Pact ${pact.consumer?.name ?? ctx.id.service} → ${provider}`, kind: "pact" }, artifactEvidence(ctx, path));
+    b.node(contract, "Contract", { name: `Pact ${pact.consumer?.name ?? ctx.id.component} → ${provider}`, kind: "pact" }, artifactEvidence(ctx, path));
     const host = splitServiceVersion(provider);
     const paths = http.map((it) => it.request?.path).filter((p): p is string => !!p);
     const versions = host.version || paths.length === 0 ? [host.version] : paths.map(pathVersion);

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:panorama-graph:format:panorama-graph-application:1",
   "title": "Aplicação",
-  "description": "application.json: o nome com que os clientes conhecem o serviço (o participante nos pacts, o grupo dos clientes HTTP). Ele nomeia a API e os endpoints. Sem o arquivo, o nome é o fim do caminho do repositório.",
+  "description": "application.json: o nome do componente, único na organização, com que os clientes o conhecem (o participante nos pacts, o grupo dos clientes HTTP). É a chave do componente e nomeia a API e os endpoints. Sem o arquivo, o nome é o fim do caminho do repositório.",
   "type": "object",
   "required": ["format", "name"],
   "properties": {

@@ -16,7 +16,7 @@ pnpm run graph-publish build/architecture --dry-run --print  # e imprime os retr
 GRAPH_API_URL=http://localhost:3200 pnpm run graph-publish build/architecture
 ```
 
-Lê um diretório de artefatos do build e envia **um retrato por artefato**. O escopo de cada retrato é o componente, `{ component: <caminho do repositório> }`. Quando um artefato falta, a fonte dele não é enviada, e a API mantém o último retrato que recebeu. Quando o artefato existe mas vem vazio (por exemplo, nenhum cliente HTTP), sai um retrato vazio, e o que aquela fonte afirmava antes vira `stale`.
+Lê um diretório de artefatos do build e envia **um retrato por artefato**. O escopo de cada retrato é o componente, `{ component: <nome> }`. Quando um artefato falta, a fonte dele não é enviada, e a API mantém o último retrato que recebeu. Quando o artefato existe mas vem vazio (por exemplo, nenhum cliente HTTP), sai um retrato vazio, e o que aquela fonte afirmava antes vira `stale`.
 
 | Arquivo | Formato | Fonte (`source`) | Fatos |
 |---|---|---|---|
@@ -28,7 +28,7 @@ Lê um diretório de artefatos do build e envia **um retrato por artefato**. O e
 | `http-clients.json` | [clientes HTTP](#clientes-http) | `http-clients` | `CONSUMES`, `CALLS` |
 | `data-access.json` | [acesso a dados](#acesso-a-dados) | `data-access` | Dataset, `OWNS_DATA`, `READS`, `WRITES` |
 | `pacts/*.json` | Pact (v2 a v4, interações HTTP) | `pact` | `CONSUMES`, `CALLS`, Contract `pact`, `SPECIFIED_BY` |
-| `application.json` | [aplicação](#aplicação) | — | Nome de serviço (ver [Identidade](#identidade)) |
+| `application.json` | [aplicação](#aplicação) | — | Nome do componente (ver [Identidade](#identidade)) |
 
 A saída é `0` quando tudo foi publicado, ou quando a API já tinha um retrato mais novo (`409`), o que não é erro. É `1` num erro de uso ou de leitura, inclusive quando a API está em outra versão do modelo (conferida no `GET /schema` antes de qualquer envio). É `2` quando a API recusa um retrato; os erros de validação são impressos.
 
@@ -36,12 +36,12 @@ A saída é `0` quando tudo foi publicado, ou quando a API já tinha um retrato 
 
 | O quê | De onde vem, em ordem | Exemplo |
 |---|---|---|
-| Caminho do repositório (chave do componente) | `--component`, `CI_PROJECT_PATH`, `GITHUB_REPOSITORY`, `manifest.component.repository` | `acme/credito/product-catalog-api` |
+| Nome do componente (a chave) | `--component`, `application.json`, fim do caminho do repositório | `product-catalog` |
+| Caminho do repositório | `--repository`, `CI_PROJECT_PATH`, `GITHUB_REPOSITORY`, `manifest.component.repository` | `acme/credito/product-catalog-api` |
 | Host do repositório | `--host`, `CI_SERVER_HOST`, `GITHUB_SERVER_URL`, `manifest.component.repository` | `gitlab.acmebank.example` |
 | Commit | `--commit`, `CI_COMMIT_SHA`, `GITHUB_SHA`, `manifest.component.commit` | `deaaa55…` |
-| Nome de serviço | `--service`, `application.json`, fim do caminho | `product-catalog` |
 
-**O nome de serviço é o nome com que os clientes conhecem o componente:** é o participante nos pacts e o grupo dos clientes HTTP. É ele que nomeia a API e os endpoints (`api:product-catalog/http`). Assim, o provedor (pelo OpenAPI) e os consumidores (pelo Pact e pelos clientes) chegam à mesma chave sem precisar de apelidos. O componente continua identificado pelo caminho do repositório, e a relação `PROVIDES` liga os dois.
+**O nome do componente é o nome de serviço, único na organização:** o nome com que os clientes o conhecem (o participante nos pacts, o grupo dos clientes HTTP), o `spring.application.name` e o `service.name` da telemetria. Ele é a chave do componente (`component:product-catalog`) e nomeia a API e os endpoints (`api:product-catalog/http`). Assim, o provedor (pelo OpenAPI), os consumidores (pelo Pact e pelos clientes), o cluster e a telemetria chegam à mesma chave sem precisar de apelidos. O repositório é outro nó, pelo caminho (`repo:<host>/<caminho>`), ligado ao componente por `HOSTED_IN`; num monorepo, vários componentes apontam para o mesmo.
 
 ### Receitas de chave
 
@@ -49,7 +49,7 @@ As receitas são as do SDK do grafo (`@panorama-graph/sdk`, em [sdks/typescript]
 
 | Nó | Chave |
 |---|---|
-| Component | `component:<caminho do repositório>` |
+| Component | `component:<nome>`, o nome de serviço |
 | Repository | `repo:<host>/<caminho>` |
 | Api | `api:<serviço>/http`; versionada, `api:<serviço>/<versão>/http` (`api:product-api/v1/http`) |
 | Endpoint | `endpoint:<serviço>/<MÉTODO> <caminho>`, com os parâmetros sem nome: `GET /products/{}`. Numa API versionada no código, `endpoint:<serviço>/<versão>/<MÉTODO> <caminho>`; a versão do host não entra. O caminho original, com os nomes, fica na propriedade `path`. |
@@ -57,7 +57,7 @@ As receitas são as do SDK do grafo (`@panorama-graph/sdk`, em [sdks/typescript]
 | Contract | `contract:openapi/<serviço>`, `contract:asyncapi/<serviço>`, `contract:pact/<consumidor>→<provedor>` |
 | Library | `lib:maven/<grupo>:<artefato>`, ou `lib:<tipo>/<namespace>/<nome>` para outros purls |
 | Technology | `tech:<nome>` |
-| Dataset | `dataset:<caminho do componente>/<nome>`. O build não sabe em que banco de cada ambiente o dataset está, então ele é identificado pelo componente que o mapeia. |
+| Dataset | `dataset:<componente>/<nome>`. O build não sabe em que banco de cada ambiente o dataset está, então ele é identificado pelo componente que o mapeia. |
 | Domain, System, Group | `domain:<id>`, `system:<id>`, `group:<id>`, pelo identificador curto na fonte (`credito`, `squad-simulacao-credito`) |
 | Person | `person:<login>` no diretório (`juliana.ribeiro`) |
 | Resource | instância `resource:<ambiente>/<nome>` (`resource:dev/mongodb`); recurso lógico nela `resource:<ambiente>/<instância>/<nome>` (`resource:dev/mongodb/product-catalog`) |
@@ -65,7 +65,7 @@ As receitas são as do SDK do grafo (`@panorama-graph/sdk`, em [sdks/typescript]
 
 ### Evidência
 
-`evidenceBase` é `<caminho>@<commit>:`, e cada fato completa com o caminho a partir da raiz do repositório:
+`evidenceBase` é `<caminho do repositório>@<commit>:`, e cada fato completa com o caminho a partir da raiz do repositório:
 - **fatos de artefato:** o arquivo em `build/architecture/`, com ponteiro JSON quando aponta para um trecho (`openapi.json#/paths/~1products~1{id}/get`). O diretório muda com `--evidence-dir`.
 - **clientes HTTP:** o arquivo do cliente que o gerador informa em `source`, com a função de cada operação (`src/main/java/.../CatalogClient.java#getProduct`). Sem `source`, o ponto do artefato (`http-clients.json#/clients/0/operations/0`).
 - **acesso a dados:** a entidade que mapeia o dataset (`OWNS_DATA`) e a linha da chamada (`READS`, `WRITES`: `src/main/java/.../MongoProductRepository.java#L24`).
@@ -197,14 +197,15 @@ Esse é o retrato da **linha principal**, o padrão das consultas. Cada retrato 
 
 ### Pacote de artefatos por commit
 
-Para o grafo mostrar a versão que roda em cada ambiente, o pipeline guarda os artefatos de cada build que vira imagem, num repositório de arquivos, com o commit no caminho:
+Para o grafo mostrar a versão que roda em cada ambiente, o pipeline guarda os artefatos de cada build que vira imagem, num repositório de arquivos, com o nome do componente e o commit no caminho. O nome é o da [identidade](#identidade): o do `application.json` e, sem ele, o fim do caminho do repositório:
 
 ```yaml
 publish_architecture_bundle:
   needs: [{ job: tests, artifacts: true }]
   script:
+    - COMPONENT=$(jq -r '.name // empty' build/architecture/application.json 2>/dev/null); COMPONENT=${COMPONENT:-$CI_PROJECT_NAME}
     - tar -czf architecture.tar.gz -C build/architecture .
-    - curl --fail -u "$USER:$PASSWORD" --upload-file architecture.tar.gz "$BUNDLES_URL/$CI_PROJECT_PATH/$CI_COMMIT_SHA.tar.gz"
+    - curl --fail -u "$USER:$PASSWORD" --upload-file architecture.tar.gz "$BUNDLES_URL/$COMPONENT/$CI_COMMIT_SHA.tar.gz"
 ```
 
 Quem lê o pacote é o `graph-deployments`, quando vê aquele commit rodando: o pipeline não decide o que está implantado.
@@ -229,7 +230,7 @@ O receptor dos pacotes de build: recebe os artefatos de `build/architecture` num
 }
 ```
 
-- **Identidade só do pacote.** O componente, o host e o commit vêm do `manifest.json` (que o build gera com as variáveis do CI ou o git), com `options` por cima. As variáveis de ambiente do receptor nunca entram.
+- **Identidade só do pacote.** O nome do componente vem do `application.json`, e o repositório, o host e o commit, do `manifest.json` (que o build gera com as variáveis do CI ou o git), com `options` por cima (`component`, `repository`, `host`, `commit`). As variáveis de ambiente do receptor nunca entram.
 - **`dryRun`** monta e confere os retratos sem gravar: no MR, o pipeline valida o pacote no mesmo receptor.
 - **Respostas:** `200` com o resultado de cada retrato (`ok`, `outdated` ou, no `dryRun`, `planned`); `400` (`invalid_build`) para pacote sem `manifest.json`, com caminho inválido ou com um formato que ele não lê; `422` (`snapshot_rejected`) quando a API recusa um retrato, com os erros de validação; `502` (`graph_unavailable`) quando a API não responde. Os erros seguem o formato do produto, `{ error, code, status, details }`. Com `Accept: text/plain`, a resposta é o resumo do `graph-publish`, que o plugin mostra no build.
 - **Sem autenticação**, como a API (ver as perguntas em aberto do [ROADMAP](https://github.com/panorama-graph/panorama-graph/blob/main/ROADMAP.md#perguntas-em-aberto)). Tamanho máximo de um pacote: 32 MB (`--max-body-mb`).
@@ -255,7 +256,7 @@ graph-deployments --api "$GRAPH_API_URL" --cluster acme \
 
 | Onde | Chave | O que é |
 |---|---|---|
-| Deployment | anotação `panorama-graph.io/component` | Caminho do repositório do componente (a chave dele no grafo). Workload sem ela não é componente e fica de fora |
+| Deployment | anotação `panorama-graph.io/component` | Nome do componente (a chave dele no grafo), o mesmo do pacote de artefatos. Workload sem ela não é componente e fica de fora |
 | Deployment | anotação `panorama-graph.io/commit` | Commit de que a imagem foi construída. Sem ele, a implantação é ignorada, com aviso |
 | Deployment | label `app.kubernetes.io/version` | Versão do artefato; sem ele, a tag da imagem |
 | Namespace | label `panorama-graph.io/environment` | Nome do ambiente (padrão: o do namespace). Marca o namespace como ambiente, mesmo sem implantação |

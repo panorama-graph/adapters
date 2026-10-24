@@ -6,7 +6,7 @@ export function planLines(plan: Plan, frozen = false): string[] {
   const { identity: id } = plan;
   const what = frozen ? "retrato congelado" : "linha principal";
   return [
-    `componente ${id.path} (serviço ${id.service}) @ ${id.commit.slice(0, 12)}${id.version ? ` (${id.version})` : ""} em ${id.host}: ${what}`,
+    `componente ${id.component} (${id.repository}) @ ${id.commit.slice(0, 12)}${id.version ? ` (${id.version})` : ""} em ${id.host}: ${what}`,
     ...plan.snapshots.map((s) => `  ${s.source.padEnd(17)} ${String(s.nodes.length).padStart(4)} nós  ${String(s.relations.length).padStart(4)} relações`),
     ...plan.skipped.map((s) => `  sem artefato: ${s}`),
   ];

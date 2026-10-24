@@ -21,10 +21,10 @@
         "version": { "description": "Versão do artefato (padrão: a do manifest.json)", "type": "string" },
         "evidenceDir": { "description": "Caminho do diretório de artefatos a partir da raiz do repositório (padrão: build/architecture)", "type": "string" },
         "observedAt": { "description": "Quando o build viu os fatos (padrão: quando o receptor recebeu)", "type": "string", "format": "date-time" },
-        "component": { "description": "Caminho do repositório (padrão: o do manifest.json)", "type": "string" },
+        "component": { "description": "Nome do componente, a chave no grafo (padrão: application.json ou o fim do caminho do repositório)", "type": "string" },
+        "repository": { "description": "Caminho do repositório (padrão: o do manifest.json)", "type": "string" },
         "host": { "description": "Host do repositório (padrão: o do manifest.json)", "type": "string" },
-        "commit": { "description": "Commit (padrão: o do manifest.json)", "type": "string" },
-        "service": { "description": "Nome do serviço para os clientes (padrão: application.json ou o fim do caminho)", "type": "string" }
+        "commit": { "description": "Commit (padrão: o do manifest.json)", "type": "string" }
       }
     },
     "dryRun": { "description": "Monta e confere os retratos, sem gravar", "type": "boolean" }

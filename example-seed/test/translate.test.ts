@@ -30,12 +30,12 @@ const inventory: InfraInventory = {
       type: "database-server",
       engine: { name: "PostgreSQL", version: "16" },
       workload: "statefulsets/postgres",
-      component: "example/infra/postgres",
+      component: "postgres",
       databases: [{ name: "products", declaredIn: "statefulsets/postgres#env.POSTGRES_DB" }],
     },
     { name: "nginx", type: "ingress", engine: { name: "ingress-nginx" }, namespace: "ingress", workload: "deployments/nginx" },
   ],
-  routes: [{ ingress: "nginx", name: "product-api", host: "product-api.{environment}.example.com", path: "/", component: "example/catalog/product-api" }],
+  routes: [{ ingress: "nginx", name: "product-api", host: "product-api.{environment}.example.com", path: "/", component: "product-api" }],
 };
 
 describe("directory", () => {
@@ -97,7 +97,7 @@ describe("infra", () => {
     expect(hml.relations).toContainEqual({
       type: "INSTANCE_OF",
       from: "resource:hml/postgres",
-      to: "component:example/infra/postgres",
+      to: "component:postgres",
       evidence: "hml/statefulsets/postgres#spec.selector.matchLabels.app",
     });
     expect(hml.relations).toContainEqual({ type: "HOSTED_ON", from: "resource:hml/postgres/products", to: "resource:hml/postgres", evidence: "hml/statefulsets/postgres#env.POSTGRES_DB" });
@@ -109,7 +109,7 @@ describe("infra", () => {
       {
         type: "ROUTES",
         from: "resource:hml/nginx",
-        to: "component:example/catalog/product-api",
+        to: "component:product-api",
         props: { host: "product-api.hml.example.com", path: "/" },
         evidence: "product-api",
       },

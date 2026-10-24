@@ -6,7 +6,7 @@ export const SOURCE = "k8s-deployments";
 
 /** Anotações e labels que o deploy põe nos workloads e namespaces. Neutros: nenhum produto ou organização no nome. */
 export const ANNOTATIONS = {
-  /** No Deployment: caminho do repositório do componente (ex.: example/catalog/product-api). */
+  /** No Deployment: nome do componente, a chave dele no grafo (ex.: product-api). */
   component: "panorama-graph.io/component",
   /** No Deployment: commit de que a imagem em execução foi construída. */
   commit: "panorama-graph.io/commit",

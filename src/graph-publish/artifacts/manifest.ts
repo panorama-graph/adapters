@@ -12,11 +12,10 @@ export const SOURCE = "build-manifest";
 export function mapManifest(ctx: Context, manifest: Manifest | undefined) {
   const b = builder(ctx, SOURCE);
   const evidence = artifactEvidence(ctx, "manifest.json");
-  const repo = repositoryKey(ctx.id.host, ctx.id.path);
-  const name = ctx.id.path.split("/").pop()!;
+  const repo = repositoryKey(ctx.id.host, ctx.id.repository);
 
-  b.node(ctx.component, "Component", { name, kind: ctx.kind }, evidence);
-  b.node(repo, "Repository", { name: ctx.id.path, ...(ctx.id.url ? { url: ctx.id.url } : {}) }, evidence);
+  b.node(ctx.component, "Component", { name: ctx.id.component, kind: ctx.kind }, evidence);
+  b.node(repo, "Repository", { name: ctx.id.repository, ...(ctx.id.url ? { url: ctx.id.url } : {}) }, evidence);
   b.relation("HOSTED_IN", ctx.component, repo, {}, evidence);
 
   for (const t of manifest?.technologies ?? []) {

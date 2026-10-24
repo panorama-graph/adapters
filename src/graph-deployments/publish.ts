@@ -133,7 +133,7 @@ export async function publishDeployments(plan: DeploymentsPlan, opts: FreezeOpti
         frozen: true,
         version: r.version,
         env: {},
-        overrides: { path: r.component, commit: r.commit, ...(opts.host ? { host: opts.host } : {}) },
+        overrides: { component: r.component, commit: r.commit, ...(opts.host ? { host: opts.host } : {}) },
       });
       log(`  ${id} (${r.version}): ${reason ? `refazendo (${reason})` : "congelando"} ${frozen.snapshots.length} retrato(s)`);
       let ok = true;
